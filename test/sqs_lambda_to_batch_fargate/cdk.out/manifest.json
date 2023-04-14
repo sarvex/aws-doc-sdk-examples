@@ -1,0 +1,154 @@
+{
+  "version": "31.0.0",
+  "artifacts": {
+    "ConsumerStack2.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "ConsumerStack2.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "ConsumerStack2": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://260778392212/us-east-1",
+      "properties": {
+        "templateFile": "ConsumerStack2.template.json",
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::260778392212:role/cdk-hnb659fds-deploy-role-260778392212-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::260778392212:role/cdk-hnb659fds-cfn-exec-role-260778392212-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-260778392212-us-east-1/e436693525aa8e6177f24da7b20a387a1dd611f1d6c746ebdb48ed08c93ce4ec.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "ConsumerStack2.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::260778392212:role/cdk-hnb659fds-lookup-role-260778392212-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "ConsumerStack2.assets"
+      ],
+      "metadata": {
+        "/ConsumerStack2/BatchJobQueue-ruby/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BatchJobQueuerubyC0D1183C"
+          }
+        ],
+        "/ConsumerStack2/BatchJobQueue-ruby/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BatchJobQueuerubyPolicy3BE41C9E"
+          }
+        ],
+        "/ConsumerStack2/BatchJobQueue-ruby/ConsumerStack2ProducerStackfanouttopic6EFF7954pYvxBdNPbEWM88190BA7/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BatchJobQueuerubyConsumerStack2ProducerStackfanouttopic6EFF7954pYvxBdNPbEWM88190BA795DA93E5"
+          }
+        ],
+        "/ConsumerStack2/SNSTopicRole-ruby/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SNSTopicRolerubyB0FE322A"
+          }
+        ],
+        "/ConsumerStack2/SNSTopicRole-ruby/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SNSTopicRolerubyDefaultPolicyAB649650"
+          }
+        ],
+        "/ConsumerStack2/LambdaExecutionRole-ruby/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LambdaExecutionRolerubyA088BFD8"
+          }
+        ],
+        "/ConsumerStack2/LambdaExecutionRole-ruby/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LambdaExecutionRolerubyDefaultPolicyAF298461"
+          }
+        ],
+        "/ConsumerStack2/BatchExecutionRole-ruby/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BatchExecutionRoleruby841CC48F"
+          }
+        ],
+        "/ConsumerStack2/FargateEnv-ruby/Resource-Security-Group/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FargateEnvrubyResourceSecurityGroup9D219C3F"
+          }
+        ],
+        "/ConsumerStack2/FargateEnv-ruby/Resource-Service-Instance-Role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FargateEnvrubyResourceServiceInstanceRole03CC7071"
+          }
+        ],
+        "/ConsumerStack2/FargateEnv-ruby/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FargateEnvrubyB8FAD781"
+          }
+        ],
+        "/ConsumerStack2/JobDefinition-ruby/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "JobDefinitionrubyCA3BE027"
+          }
+        ],
+        "/ConsumerStack2/JobQueue-ruby/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "JobQueueruby312D0464"
+          }
+        ],
+        "/ConsumerStack2/SubmitBatchJob-ruby/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubmitBatchJobruby4FDB7778"
+          }
+        ],
+        "/ConsumerStack2/SubmitBatchJob-ruby/SqsEventSource:ConsumerStack2BatchJobQueueruby3347C564/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SubmitBatchJobrubySqsEventSourceConsumerStack2BatchJobQueueruby3347C564ECA3C06D"
+          }
+        ],
+        "/ConsumerStack2/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/ConsumerStack2/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/ConsumerStack2/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "ConsumerStack2"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

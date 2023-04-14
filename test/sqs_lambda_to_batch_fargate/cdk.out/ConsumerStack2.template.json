@@ -1,0 +1,563 @@
+{
+ "Resources": {
+  "BatchJobQueuerubyC0D1183C": {
+   "Type": "AWS::SQS::Queue",
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/BatchJobQueue-ruby/Resource"
+   }
+  },
+  "BatchJobQueuerubyPolicy3BE41C9E": {
+   "Type": "AWS::SQS::QueuePolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:SendMessage",
+       "Condition": {
+        "ArnEquals": {
+         "aws:SourceArn": "arn:aws:sns:us-east-1:808326389482:ProducerStack-fanouttopic6EFF7954-pYvxBdNPbEWM"
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "sns.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "BatchJobQueuerubyC0D1183C",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "sqs:*",
+       "Condition": {
+        "ArnLike": {
+         "aws:SourceArn": "arn:aws:sns:us-east-1:808326389482:ProducerStack-fanouttopic6EFF7954-pYvxBdNPbEWM"
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": [
+         "arn:aws:iam::808326389482:root",
+         {
+          "Fn::Join": [
+           "",
+           [
+            "arn:aws:iam::",
+            {
+             "Ref": "AWS::AccountId"
+            },
+            ":root"
+           ]
+          ]
+         }
+        ]
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "BatchJobQueuerubyC0D1183C",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Queues": [
+     {
+      "Ref": "BatchJobQueuerubyC0D1183C"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/BatchJobQueue-ruby/Policy/Resource"
+   }
+  },
+  "BatchJobQueuerubyConsumerStack2ProducerStackfanouttopic6EFF7954pYvxBdNPbEWM88190BA795DA93E5": {
+   "Type": "AWS::SNS::Subscription",
+   "Properties": {
+    "Protocol": "sqs",
+    "TopicArn": "arn:aws:sns:us-east-1:808326389482:ProducerStack-fanouttopic6EFF7954-pYvxBdNPbEWM",
+    "Endpoint": {
+     "Fn::GetAtt": [
+      "BatchJobQueuerubyC0D1183C",
+      "Arn"
+     ]
+    },
+    "Region": "us-east-1"
+   },
+   "DependsOn": [
+    "BatchJobQueuerubyPolicy3BE41C9E"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/BatchJobQueue-ruby/ConsumerStack2ProducerStackfanouttopic6EFF7954pYvxBdNPbEWM88190BA7/Resource"
+   }
+  },
+  "SNSTopicRolerubyB0FE322A": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "sns.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Description": "Allows the SNS topic to send messages to the SQS queue in this account",
+    "RoleName": "SNSTopicRole-ruby"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/SNSTopicRole-ruby/Resource"
+   }
+  },
+  "SNSTopicRolerubyDefaultPolicyAB649650": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sqs:SendMessage",
+       "Condition": {
+        "ArnEquals": {
+         "aws:SourceArn": "arn:aws:sns:us-east-1:808326389482:ProducerStack-fanouttopic6EFF7954-pYvxBdNPbEWM"
+        }
+       },
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "BatchJobQueuerubyC0D1183C",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "SNSTopicRolerubyDefaultPolicyAB649650",
+    "Roles": [
+     {
+      "Ref": "SNSTopicRolerubyB0FE322A"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/SNSTopicRole-ruby/DefaultPolicy/Resource"
+   }
+  },
+  "LambdaExecutionRolerubyA088BFD8": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Description": "Allows Lambda function to submit jobs to Batch",
+    "RoleName": "LambdaExecutionRole-ruby"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/LambdaExecutionRole-ruby/Resource"
+   }
+  },
+  "LambdaExecutionRolerubyDefaultPolicyAF298461": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "sqs:ReceiveMessage",
+        "sqs:ChangeMessageVisibility",
+        "sqs:GetQueueUrl",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "BatchJobQueuerubyC0D1183C",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "sqs:ReceiveMessage",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "BatchJobQueuerubyC0D1183C",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "batch:*",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "LambdaExecutionRolerubyDefaultPolicyAF298461",
+    "Roles": [
+     {
+      "Ref": "LambdaExecutionRolerubyA088BFD8"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/LambdaExecutionRole-ruby/DefaultPolicy/Resource"
+   }
+  },
+  "BatchExecutionRoleruby841CC48F": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/job-function/SystemAdministrator"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+       ]
+      ]
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams"
+         ],
+         "Effect": "Allow",
+         "Resource": "arn:aws:logs:*:*:*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "MyCustomPolicy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/BatchExecutionRole-ruby/Resource"
+   }
+  },
+  "FargateEnvrubyResourceSecurityGroup9D219C3F": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "ConsumerStack2/FargateEnv-ruby/Resource-Security-Group",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": "vpc-0c4a8ac37436f701a"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/FargateEnv-ruby/Resource-Security-Group/Resource"
+   }
+  },
+  "FargateEnvrubyResourceServiceInstanceRole03CC7071": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "batch.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSBatchServiceRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/FargateEnv-ruby/Resource-Service-Instance-Role/Resource"
+   }
+  },
+  "FargateEnvrubyB8FAD781": {
+   "Type": "AWS::Batch::ComputeEnvironment",
+   "Properties": {
+    "Type": "MANAGED",
+    "ComputeResources": {
+     "MaxvCpus": 256,
+     "SecurityGroupIds": [
+      {
+       "Fn::GetAtt": [
+        "FargateEnvrubyResourceSecurityGroup9D219C3F",
+        "GroupId"
+       ]
+      }
+     ],
+     "Subnets": [
+      "subnet-0155e9561863fdcca",
+      "subnet-099591e1bbcc9328c",
+      "subnet-01956184cb64b1999",
+      "subnet-069f1c45108e64148",
+      "subnet-05ddd6f4a04ad984c",
+      "subnet-06a225ba1d4ccfa85"
+     ],
+     "Type": "FARGATE"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "FargateEnvrubyResourceServiceInstanceRole03CC7071",
+      "Arn"
+     ]
+    },
+    "State": "ENABLED"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/FargateEnv-ruby/Resource"
+   }
+  },
+  "JobDefinitionrubyCA3BE027": {
+   "Type": "AWS::Batch::JobDefinition",
+   "Properties": {
+    "Type": "container",
+    "ContainerProperties": {
+     "Command": [
+      "./ruby/run_tests.sh"
+     ],
+     "Environment": [
+      {
+       "Name": "AWS_REGION",
+       "Value": "us-east-1"
+      },
+      {
+       "Name": "AWS_ACCOUNT",
+       "Value": "260778392212"
+      }
+     ],
+     "ExecutionRoleArn": {
+      "Fn::GetAtt": [
+       "BatchExecutionRoleruby841CC48F",
+       "Arn"
+      ]
+     },
+     "Image": "public.ecr.aws/b4v4v1s0/ruby:latest",
+     "LogConfiguration": {
+      "LogDriver": "awslogs"
+     },
+     "NetworkConfiguration": {
+      "AssignPublicIp": "ENABLED"
+     },
+     "Privileged": false,
+     "ReadonlyRootFilesystem": false,
+     "ResourceRequirements": [
+      {
+       "Type": "VCPU",
+       "Value": "0.25"
+      },
+      {
+       "Type": "MEMORY",
+       "Value": "512"
+      }
+     ]
+    },
+    "PlatformCapabilities": [
+     "FARGATE"
+    ],
+    "RetryStrategy": {
+     "Attempts": 1
+    },
+    "Timeout": {}
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/JobDefinition-ruby/Resource"
+   }
+  },
+  "JobQueueruby312D0464": {
+   "Type": "AWS::Batch::JobQueue",
+   "Properties": {
+    "ComputeEnvironmentOrder": [
+     {
+      "ComputeEnvironment": {
+       "Ref": "FargateEnvrubyB8FAD781"
+      },
+      "Order": 1
+     }
+    ],
+    "Priority": 1,
+    "State": "ENABLED"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/JobQueue-ruby/Resource"
+   }
+  },
+  "SubmitBatchJobruby4FDB7778": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-260778392212-us-east-1",
+     "S3Key": "15ed23f2097bbd5884492973358fbf73a4266b08d667e7cbb897c43f33735744.zip"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "LambdaExecutionRolerubyA088BFD8",
+      "Arn"
+     ]
+    },
+    "Environment": {
+     "Variables": {
+      "LANGUAGE_NAME": "ruby",
+      "JOB_QUEUE": {
+       "Ref": "JobQueueruby312D0464"
+      },
+      "JOB_DEFINITION": {
+       "Ref": "JobDefinitionrubyCA3BE027"
+      },
+      "JOB_NAME": "job-ruby"
+     }
+    },
+    "Handler": "lambda_handler.lambda_handler",
+    "Runtime": "python3.8"
+   },
+   "DependsOn": [
+    "LambdaExecutionRolerubyDefaultPolicyAF298461",
+    "LambdaExecutionRolerubyA088BFD8"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/SubmitBatchJob-ruby/Resource",
+    "aws:asset:path": "asset.15ed23f2097bbd5884492973358fbf73a4266b08d667e7cbb897c43f33735744",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "SubmitBatchJobrubySqsEventSourceConsumerStack2BatchJobQueueruby3347C564ECA3C06D": {
+   "Type": "AWS::Lambda::EventSourceMapping",
+   "Properties": {
+    "FunctionName": {
+     "Ref": "SubmitBatchJobruby4FDB7778"
+    },
+    "EventSourceArn": {
+     "Fn::GetAtt": [
+      "BatchJobQueuerubyC0D1183C",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/SubmitBatchJob-ruby/SqsEventSource:ConsumerStack2BatchJobQueueruby3347C564/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/21RTU8CMRD9Ldy7wwYSjTcF0cRoguCddMsAI7tt7Qdmbfa/25YFMXrpzLz3Opk3M4LrEkI54J+2EOt9UVMFYem42LMIrYKVFsKb0iQm3CJb+soKQ9qRkmy6kZd1x+xHFL969Ji4Y5LfuapJtGfwWHaMeANhoeosz/FH2GfP/KtNTMdQjOJkKLwh1z4a5XUe4BLoWMWd2EGIxFQ12jucyQMZJRuULsmfVHWPG5J0MhCBPFLqb2GqpOMk0VyIat5Uaw7hwUtx+nXOZ4fYeKm8EfjCtSa5TfRfNO5mvOLWorNwl0KsYeLFHl3aa8cWaLOeZTYeYNv3OhEdKwte6x2HcnDbX2uYYrbcU+Ef178tn/12bN66nZLDMdzA1eDdEhXGS0cNwuIYvwGSkj3BHAIAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "ConsumerStack2/CDKMetadata/Default"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
