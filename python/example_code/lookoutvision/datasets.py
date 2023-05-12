@@ -67,18 +67,18 @@ class Datasets:
             finished = False
             status = ""
             dataset_description = {}
-            while finished is False:
+            while not finished:
                 dataset_description = lookoutvision_client.describe_dataset(
                     ProjectName=project_name, DatasetType=dataset_type
                 )
                 status = dataset_description["DatasetDescription"]["Status"]
 
-                if status == "CREATE_IN_PROGRESS":
-                    logger.info("Dataset creation in progress...")
-                    time.sleep(2)
-                elif status == "CREATE_COMPLETE":
+                if status == "CREATE_COMPLETE":
                     logger.info("Dataset created.")
                     finished = True
+                elif status == "CREATE_IN_PROGRESS":
+                    logger.info("Dataset creation in progress...")
+                    time.sleep(2)
                 else:
                     logger.info(
                         "Dataset creation failed: %s",
@@ -131,16 +131,14 @@ class Datasets:
                 src_bucket = s3_resource.Bucket(bucket)
 
                 # Create JSON lines for anomalous images.
-                for obj in src_bucket.objects.filter(
-                        Prefix=prefix + "anomaly/", Delimiter="/"):
+                for obj in src_bucket.objects.filter(Prefix=f"{prefix}anomaly/", Delimiter="/"):
                     image_path = f"s3://{src_bucket.name}/{obj.key}"
                     manifest = Datasets.create_json_line(
                         image_path, "anomaly", dttm)
                     mfile.write(json.dumps(manifest) + "\n")
 
                 # Create json lines for normal images.
-                for obj in src_bucket.objects.filter(
-                        Prefix=prefix + "normal/", Delimiter="/"):
+                for obj in src_bucket.objects.filter(Prefix=f"{prefix}normal/", Delimiter="/"):
                     image_path = f"s3://{src_bucket.name}/{obj.key}"
                     manifest = Datasets.create_json_line(
                         image_path, "normal", dttm)
@@ -182,7 +180,7 @@ class Datasets:
             logger.error("Unexpected label value: %s for %s", label, image)
             raise Exception(f"Unexpected label value: {label} for {image}")
 
-        manifest = {
+        return {
             "source-ref": image,
             "anomaly-label": label,
             "anomaly-label-metadata": {
@@ -194,7 +192,6 @@ class Datasets:
                 "type": "groundtruth/image-classification",
             },
         }
-        return manifest
 # snippet-end:[python.example_code.lookoutvision.Scenario_CreateManifestFile]
 
 # snippet-start:[python.example_code.lookoutvision.DeleteDataset]
@@ -284,7 +281,7 @@ class Datasets:
             )
 
             finished = False
-            
+
             while not finished:
 
                 dataset = lookoutvision_client.describe_dataset(ProjectName=project_name,
@@ -324,7 +321,7 @@ class Datasets:
                     f"Failed. Unexpected state for dataset update: {status} : "
                     "{status_message} :{dataset_type} dataset for project {project_name}.")
 
-            logger.info(f"Added entries to dataset.")
+            logger.info("Added entries to dataset.")
 
             return status, status_message
 

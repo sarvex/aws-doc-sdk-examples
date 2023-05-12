@@ -42,9 +42,10 @@ print(f"The unique identifier for this run is '{unique}'. All uploads will be pr
 def upload_df_file(filename, type_, mime='application/octet-stream'):
     upload_response = client.create_upload(
         projectArn=config['projectArn'],
-        name=unique+"_"+os.path.basename(filename),
+        name=f"{unique}_{os.path.basename(filename)}",
         type=type_,
-        contentType=mime)
+        contentType=mime,
+    )
     upload_arn = upload_response['upload']['arn']
     # Extract the URL of the upload and use Requests to upload it.
     upload_url = upload_response['upload']['url']
@@ -94,12 +95,11 @@ try:
     while True:
         response = client.get_run(arn=run_arn)
         state = response['run']['status']
-        if state == 'COMPLETED' or state == 'ERRORED':
+        if state in ['COMPLETED', 'ERRORED']:
             break
-        else:
-            print(f" Run {unique} in state {state}, total "
-                  f"time {datetime.datetime.now() - start_time}")
-            time.sleep(10)
+        print(f" Run {unique} in state {state}, total "
+              f"time {datetime.datetime.now() - start_time}")
+        time.sleep(10)
 except:
     client.stop_run(arn=run_arn)
     exit(1)

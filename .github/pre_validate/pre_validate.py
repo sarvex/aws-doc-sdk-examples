@@ -17,6 +17,7 @@ The script scans code files and does the following:
       not required to include these tags, but if you do they must be in pairs.
 """
 
+
 import os
 import re
 import argparse
@@ -133,16 +134,11 @@ ALLOW_LIST = {
     'videoMetaData=celebrityRecognitionResult',
     'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
     'com/v1/documentation/api/latest/guide/s3',
-    'iam/commands/GetServerCertificateCommand',
-    'iam/commands/GetAccessKeyLastUsedCommand',
     'iam/commands/GetAccessKeyLastUsedCommand',
     'iam/commands/GetServerCertificateCommand',
     'cloudwatch/commands/PutMetricDataCommand',
-    'ses/commands/VerifyDomainIdentityCommand',
-    'ses/commands/DeleteReceiptRuleSetCommand',
     'ses/commands/DeleteReceiptRuleSetCommand',
     'ses/commands/CreateReceiptRuleSetCommand',
-    'ses/commands/VerifyDomainIdentityCommand',
     'ses/commands/VerifyDomainIdentityCommand',
     'com/amazondynamodb/latest/developerguide',
     'DynamodbRubyExampleCreateUsersTableStack',
@@ -157,7 +153,6 @@ ALLOW_LIST = {
     'SynthesizeSpeechExample/SynthesizeSpeech',
     'com/autoscaling/ec2/APIReference/Welcome',
     'CreateCollectionExample/CreateCollection',
-    'DeleteCollectionExample/DeleteCollection',
     'com/awssupport/latest/APIReference/index',
     'DescribeDbClusterParameterGroupsResponse',
     'DeleteCollectionExample/DeleteCollection',
@@ -221,7 +216,7 @@ def verify_no_deny_list_words(file_contents, file_location):
     segments = file_contents.split('/')
     for word in segments:
         if word in DENY_LIST:
-            logger.error(f"Word '%s' in %s is not allowed.", word, file_location)
+            logger.error("Word '%s' in %s is not allowed.", word, file_location)
             error_count += 1
     return error_count
 
@@ -239,19 +234,38 @@ def verify_sample_files(root_path):
             file_path = os.path.join(path, file_name)
             ext = os.path.splitext(file_name)[1].lstrip('.')
             if file_name not in EXPECTED_SAMPLE_FILES:
-                logger.error(f"File '%s' in %s was not found in the list of expected sample files. If this is a new sample file, add it to the EXPECTED_SAMPLE_FILES list in pre_validate.py.", file_name, sample_files_folder)
+                logger.error(
+                    "File '%s' in %s was not found in the list of expected sample files. If this is a new sample file, add it to the EXPECTED_SAMPLE_FILES list in pre_validate.py.",
+                    file_name,
+                    sample_files_folder,
+                )
                 error_count += 1
-            if ext.lower() in MEDIA_FILE_TYPES:
-                if media_folder not in file_path:
-                    logger.error(f"File '%s' in %s must be in the %s directory.", file_name, sample_files_folder, media_folder)
-                    error_count += 1
+            if (
+                ext.lower() in MEDIA_FILE_TYPES
+                and media_folder not in file_path
+            ):
+                logger.error(
+                    "File '%s' in %s must be in the %s directory.",
+                    file_name,
+                    sample_files_folder,
+                    media_folder,
+                )
+                error_count += 1
             if (os.path.getsize(file_path)/ONE_MB_AS_BYTES) > MAX_FILE_SIZE_MB:
-                logger.error(f"File '%s' in %s is larger than the allowed size for a sample file.", file_name, sample_files_folder)
+                logger.error(
+                    "File '%s' in %s is larger than the allowed size for a sample file.",
+                    file_name,
+                    sample_files_folder,
+                )
                 error_count += 1
 
     for sample_file in EXPECTED_SAMPLE_FILES:
         if sample_file not in file_list:
-            logger.error(f"Expected sample file '%s' was not found in '%s'. If this file was intentionally removed, remove it from the EXPECTED_SAMPLE_FILES list in pre_validate.py.", sample_file, sample_files_folder)
+            logger.error(
+                "Expected sample file '%s' was not found in '%s'. If this file was intentionally removed, remove it from the EXPECTED_SAMPLE_FILES list in pre_validate.py.",
+                sample_file,
+                sample_files_folder,
+            )
             error_count += 1
     return error_count
 

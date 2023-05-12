@@ -108,7 +108,7 @@ def construct_federated_url(assume_role_arn, session_name, issuer, sts_client):
             'Session': json.dumps(session_data)
         })
     signin_token = json.loads(response.text)
-    print(f"Got a sign-in token from the AWS sign-in federation endpoint.")
+    print("Got a sign-in token from the AWS sign-in federation endpoint.")
 
     # Make a federated URL that can be used to sign into the AWS Management Console.
     query_string = urllib.parse.urlencode({
@@ -117,8 +117,7 @@ def construct_federated_url(assume_role_arn, session_name, issuer, sts_client):
         'Destination': 'https://console.aws.amazon.com/',
         'SigninToken': signin_token['SigninToken']
     })
-    federated_url = f'{aws_federated_signin_endpoint}?{query_string}'
-    return federated_url
+    return f'{aws_federated_signin_endpoint}?{query_string}'
 # snippet-end:[iam.python.construct_federated_url]
 
 
@@ -141,7 +140,7 @@ def teardown(role):
 def usage_demo():
     """Drives the demonstration."""
     print('-'*88)
-    print(f"Welcome to the AWS Security Token Service federated URL demo.")
+    print("Welcome to the AWS Security Token Service federated URL demo.")
     print('-'*88)
     iam_resource = boto3.resource('iam')
     role = setup(iam_resource)

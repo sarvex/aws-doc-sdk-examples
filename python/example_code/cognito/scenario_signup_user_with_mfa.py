@@ -59,21 +59,20 @@ def run_scenario(cognito_idp_client, user_pool_id, client_id):
     while not confirmed:
         print(f"User {user_name} requires confirmation. Check {email} for "
               f"a verification code.")
-        confirmation_code = q.ask("Enter the confirmation code from the email: ")
-        if not confirmation_code:
-            if q.ask("Do you need another confirmation code (y/n)? ", q.is_yesno):
-                delivery = cog_wrapper.resend_confirmation(user_name)
-                print(f"Confirmation code sent by {delivery['DeliveryMedium']} "
-                      f"to {delivery['Destination']}.")
-        else:
+        if confirmation_code := q.ask(
+            "Enter the confirmation code from the email: "
+        ):
             confirmed = cog_wrapper.confirm_user_sign_up(user_name, confirmation_code)
+        elif q.ask("Do you need another confirmation code (y/n)? ", q.is_yesno):
+            delivery = cog_wrapper.resend_confirmation(user_name)
+            print(f"Confirmation code sent by {delivery['DeliveryMedium']} "
+                  f"to {delivery['Destination']}.")
     print(f"User {user_name} is confirmed and ready to use.")
     print('-'*88)
 
     print("Let's get a list of users in the user pool.")
     q.ask("Press Enter when you're ready.")
-    users = cog_wrapper.list_users()
-    if users:
+    if users := cog_wrapper.list_users():
         print(f"Found {len(users)} users:")
         pp(users)
     else:

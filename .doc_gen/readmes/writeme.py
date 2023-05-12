@@ -21,7 +21,12 @@ def main():
         'language', metavar='sdk_language', choices=scanner.sdks(), help="The language of the SDK. Choose from: %(choices)s.")
     parser.add_argument(
         'sdk_version', help=f"The major version of the SDK. Must match a version of the specified SDK: {', '.join(lang_vers)}")
-    parser.add_argument('service', metavar='service', choices=scanner.services(), help=f"The targeted service. Choose from: %(choices)s.")
+    parser.add_argument(
+        'service',
+        metavar='service',
+        choices=scanner.services(),
+        help="The targeted service. Choose from: %(choices)s.",
+    )
     parser.add_argument('--svc_folder', help="Overrides the folder template to specify the service example folder.")
     parser.add_argument(
         '--safe', action='store_true',

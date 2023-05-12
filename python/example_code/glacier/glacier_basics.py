@@ -367,24 +367,27 @@ def retrieve_demo(glacier, vault_name):
     try:
         vault.load()
     except ClientError as err:
-        if err.response['Error']['Code'] == 'ResourceNotFoundException':
-            print(f"\nVault {vault_name} doesn't exist. You must first run this script "
-                  f"with the --upload flag to create the vault.")
-            return
-        else:
+        if err.response['Error']['Code'] != 'ResourceNotFoundException':
             raise
 
+        print(f"\nVault {vault_name} doesn't exist. You must first run this script "
+              f"with the --upload flag to create the vault.")
+        return
     print(f"\nGetting completed jobs for {vault.name}.")
     jobs = glacier.list_jobs(vault, 'completed')
     if not jobs:
         print("\nNo completed jobs found. Give it some time and try again later.")
         return
 
-    retrieval_job = None
-    for job in jobs:
-        if job.action == 'ArchiveRetrieval' and job.status_code == 'Succeeded':
-            retrieval_job = job
-            break
+    retrieval_job = next(
+        (
+            job
+            for job in jobs
+            if job.action == 'ArchiveRetrieval'
+            and job.status_code == 'Succeeded'
+        ),
+        None,
+    )
     if retrieval_job is None:
         print("\nNo ArchiveRetrieval jobs found. Give it some time and try again "
               "later.")

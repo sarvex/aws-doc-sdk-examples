@@ -13,6 +13,7 @@ your own code to send and sign requests. The example is for reference only and i
 maintained as functional code.
 """
 
+
 # AWS Version 4 signing example
 
 # DynamoDB API (CreateTable)
@@ -21,7 +22,7 @@ maintained as functional code.
 # This version makes a POST request and passes request parameters
 # in the body (payload) of the request. Auth information is passed in
 # an Authorization header.
-import sys, os, base64, datetime, hashlib, hmac 
+import sys, os, base64, datetime, hashlib, hmac
 import requests # pip install requests
 
 # ************* REQUEST VALUES *************
@@ -37,9 +38,9 @@ content_type = 'application/x-amz-json-1.0'
 #     DynamoDB_<API version>.<operationName>
 amz_target = 'DynamoDB_20120810.CreateTable'
 
-# Request parameters for CreateTable--passed in a JSON block.
-request_parameters =  '{'
-request_parameters +=  '"KeySchema": [{"KeyType": "HASH","AttributeName": "Id"}],'
+request_parameters = (
+    '{' + '"KeySchema": [{"KeyType": "HASH","AttributeName": "Id"}],'
+)
 request_parameters +=  '"TableName": "TestTable","AttributeDefinitions": [{"AttributeName": "Id","AttributeType": "S"}],'
 request_parameters +=  '"ProvisionedThroughput": {"WriteCapacityUnits": 5,"ReadCapacityUnits": 5}'
 request_parameters +=  '}'
@@ -50,11 +51,10 @@ def sign(key, msg):
     return hmac.new(key, msg.encode("utf-8"), hashlib.sha256).digest()
 
 def getSignatureKey(key, date_stamp, regionName, serviceName):
-    kDate = sign(('AWS4' + key).encode('utf-8'), date_stamp)
+    kDate = sign(f'AWS4{key}'.encode('utf-8'), date_stamp)
     kRegion = sign(kDate, regionName)
     kService = sign(kRegion, serviceName)
-    kSigning = sign(kService, 'aws4_request')
-    return kSigning
+    return sign(kService, 'aws4_request')
 
 # Read AWS access key from env. variables or configuration file. Best practice is NOT
 # to embed credentials in code.
@@ -87,7 +87,19 @@ canonical_querystring = ''
 # Step 4: Create the canonical headers. Header names must be trimmed
 # and lowercase, and sorted in code point order from low to high.
 # Note that there is a trailing \n.
-canonical_headers = 'content-type:' + content_type + '\n' + 'host:' + host + '\n' + 'x-amz-date:' + amz_date + '\n' + 'x-amz-target:' + amz_target + '\n'
+canonical_headers = (
+    f'content-type:{content_type}'
+    + '\n'
+    + 'host:'
+    + host
+    + '\n'
+    + 'x-amz-date:'
+    + amz_date
+    + '\n'
+    + 'x-amz-target:'
+    + amz_target
+    + '\n'
+)
 
 # Step 5: Create the list of signed headers. This lists the headers
 # in the canonical_headers list, delimited with ";" and in alpha order.
@@ -109,7 +121,7 @@ canonical_request = method + '\n' + canonical_uri + '\n' + canonical_querystring
 # Match the algorithm to the hashing algorithm you use, either SHA-1 or
 # SHA-256 (recommended)
 algorithm = 'AWS4-HMAC-SHA256'
-credential_scope = date_stamp + '/' + region + '/' + service + '/' + 'aws4_request'
+credential_scope = f'{date_stamp}/{region}/{service}/aws4_request'
 string_to_sign = algorithm + '\n' +  amz_date + '\n' +  credential_scope + '\n' +  hashlib.sha256(canonical_request.encode('utf-8')).hexdigest()
 
 # ************* TASK 3: CALCULATE THE SIGNATURE *************
@@ -122,7 +134,7 @@ signature = hmac.new(signing_key, (string_to_sign).encode('utf-8'), hashlib.sha2
 
 # ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST *************
 # Put the signature information in a header named Authorization.
-authorization_header = algorithm + ' ' + 'Credential=' + access_key + '/' + credential_scope + ', ' +  'SignedHeaders=' + signed_headers + ', ' + 'Signature=' + signature
+authorization_header = f'{algorithm} Credential={access_key}/{credential_scope}, SignedHeaders={signed_headers}, Signature={signature}'
 
 # For DynamoDB, the request can include any headers, but MUST include "host", "x-amz-date",
 # "x-amz-target", "content-type", and "Authorization". Except for the authorization
@@ -137,7 +149,7 @@ headers = {'Content-Type':content_type,
 
 # ************* SEND THE REQUEST *************
 print('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
-print('Request URL = ' + endpoint)
+print(f'Request URL = {endpoint}')
 
 r = requests.post(endpoint, data=request_parameters, headers=headers)
 

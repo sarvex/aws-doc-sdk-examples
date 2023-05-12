@@ -34,17 +34,16 @@ class PhotoList(Resource):
         photos = []
         result = 200
         try:
-            for obj in self.photo_bucket.objects.all():
-                if obj.key.lower().endswith(PhotoList.photo_types):
-                    photos.append({'name': obj.key, 'size': obj.size})
+            photos.extend(
+                {'name': obj.key, 'size': obj.size}
+                for obj in self.photo_bucket.objects.all()
+                if obj.key.lower().endswith(PhotoList.photo_types)
+            )
         except ClientError as err:
             logger.error(
                 "Couldn't get photos from bucket %s. Here's why: %s: %s", self.photo_bucket.name,
                 err.response['Error']['Code'], err.response['Error']['Message'])
-            if err.response['Error']['Code'] == 'AccessDenied':
-                result = 403
-            else:
-                result = 400
+            result = 403 if err.response['Error']['Code'] == 'AccessDenied' else 400
         return photos, result
 
     def post(self):
@@ -66,10 +65,7 @@ class PhotoList(Resource):
             logger.error(
                 "Couldn't upload file %s. Here's why: %s: %s", image_file.filename,
                 err.response['Error']['Code'], err.response['Error']['Message'])
-            if err.response['Error']['Code'] == 'AccessDenied':
-                result = 403
-            else:
-                result = 404
+            result = 403 if err.response['Error']['Code'] == 'AccessDenied' else 404
         except S3UploadFailedError as err:
             logger.error(
                 "Couldn't upload file %s. Here's why: %s", image_file.filename, err)

@@ -33,6 +33,5 @@ def lambda_handler(event, context):
     else:
         logger.error("%s is not a valid action.", action)
 
-    response = {'result': result}
-    return response
+    return {'result': result}
 # snippet-end:[python.example_code.lambda.handler.increment]

@@ -48,10 +48,7 @@ class Models:
                 "s3://", "").split("/", 1)
             output_config = {
                 "S3Location": {"Bucket": output_bucket, "Prefix": output_folder}}
-            tags = []
-            if tag_key is not None:
-                tags = [{"Key": tag_key, "Value": tag_key_value}]
-
+            tags = [] if tag_key is None else [{"Key": tag_key, "Value": tag_key_value}]
             response = lookoutvision_client.create_model(
                 ProjectName=project_name, OutputConfig=output_config, Tags=tags)
 
@@ -64,7 +61,7 @@ class Models:
             # Wait until training completes.
             finished = False
             status = "UNKNOWN"
-            while finished is False:
+            while not finished:
                 model_description = lookoutvision_client.describe_model(
                     ProjectName=project_name,
                     ModelVersion=response["ModelMetadata"]["ModelVersion"])
@@ -137,7 +134,7 @@ class Models:
         """
         try:
             response = lookoutvision_client.list_models(ProjectName=project_name)
-            print("Project: " + project_name)
+            print(f"Project: {project_name}")
             for model in response["Models"]:
                 Models.describe_model(
                     lookoutvision_client, project_name, model["ModelVersion"])
@@ -168,12 +165,11 @@ class Models:
             while model_exists:
                 response = lookoutvision_client.list_models(ProjectName=project_name)
 
-                model_exists = False
-                for model in response["Models"]:
-                    if model["ModelVersion"] == model_version:
-                        model_exists = True
-
-                if model_exists is False:
+                model_exists = any(
+                    model["ModelVersion"] == model_version
+                    for model in response["Models"]
+                )
+                if not model_exists:
                     logger.info("Model deleted")
                 else:
                     logger.info("Model is being deleted...")

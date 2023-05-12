@@ -86,14 +86,14 @@ def test_confirm_user_sign_up(make_stubber, client_secret, error_code):
     wrapper = CognitoIdentityProviderWrapper(cognito_idp_client, '', client_id, client_secret)
     user_name = 'test-user_name'
     conf_code = '1234'
-    success = True
-
     cognito_idp_stubber.stub_confirm_sign_up(
         client_id, user_name, conf_code, None if client_secret is None else ANY,
         error_code=error_code)
 
     if error_code is None:
         got_success = wrapper.confirm_user_sign_up(user_name, conf_code)
+        success = True
+
         assert got_success == success
     else:
         with pytest.raises(ClientError) as exc_info:

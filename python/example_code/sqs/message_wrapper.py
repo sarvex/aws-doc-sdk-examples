@@ -211,7 +211,7 @@ def usage_demo():
     while line < len(lines):
         messages = [pack_message(__file__, lines[index], index)
                     for index in range(line, min(line + batch_size, len(lines)))]
-        line = line + batch_size
+        line += batch_size
         send_messages(queue, messages)
         print('.', end='')
         sys.stdout.flush()
@@ -232,10 +232,12 @@ def usage_demo():
             more_messages = False
     print('Done.')
 
-    if all([lines[index] == received_lines[index] for index in range(len(lines))]):
-        print(f"Successfully reassembled all file lines!")
+    if all(
+        lines[index] == received_lines[index] for index in range(len(lines))
+    ):
+        print("Successfully reassembled all file lines!")
     else:
-        print(f"Uh oh, some lines were missed!")
+        print("Uh oh, some lines were missed!")
 
     queue.delete()
 

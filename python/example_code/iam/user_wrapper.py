@@ -200,11 +200,10 @@ def usage_demo():
             demo_object = s3_read_writer_resource.Bucket(bucket.name).put_object(
                 Key=demo_object_key, Body=b'AWS IAM demo object content!')
         except ClientError as error:
-            if error.response['Error']['Code'] == 'InvalidAccessKeyId':
-                print("Access key not yet available. Waiting...")
-                time.sleep(1)
-            else:
+            if error.response['Error']['Code'] != 'InvalidAccessKeyId':
                 raise
+            print("Access key not yet available. Waiting...")
+            time.sleep(1)
     print(f"Put {demo_object_key} into {bucket.name} using "
           f"{user_read_writer.name}'s credentials.")
 
@@ -226,12 +225,11 @@ def usage_demo():
             print(f"Got object {demo_object.key} using reader user's credentials.")
             print(f"Object content: {demo_content}")
         except ClientError as error:
-            if error.response['Error']['Code'] == 'InvalidAccessKeyId':
-                print("Access key not yet available. Waiting...")
-                time.sleep(1)
-            else:
+            if error.response['Error']['Code'] != 'InvalidAccessKeyId':
                 raise
 
+            print("Access key not yet available. Waiting...")
+            time.sleep(1)
     try:
         demo_object.delete()
     except ClientError as error:

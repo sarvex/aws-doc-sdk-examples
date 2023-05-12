@@ -37,11 +37,10 @@ def sign(key, msg):
     return hmac.new(key, msg.encode('utf-8'), hashlib.sha256).digest()
 
 def getSignatureKey(key, dateStamp, regionName, serviceName):
-    kDate = sign(('AWS4' + key).encode('utf-8'), dateStamp)
+    kDate = sign(f'AWS4{key}'.encode('utf-8'), dateStamp)
     kRegion = sign(kDate, regionName)
     kService = sign(kRegion, serviceName)
-    kSigning = sign(kService, 'aws4_request')
-    return kSigning
+    return sign(kService, 'aws4_request')
 
 # Read AWS access key from env. variables or configuration file. Best practice is NOT
 # to embed credentials in code.
@@ -75,7 +74,7 @@ canonical_querystring = request_parameters
 # Step 4: Create the canonical headers and signed headers. Header names
 # must be trimmed and lowercase, and sorted in code point order from
 # low to high. Note that there is a trailing \n.
-canonical_headers = 'host:' + host + '\n' + 'x-amz-date:' + amzdate + '\n'
+canonical_headers = f'host:{host}' + '\n' + 'x-amz-date:' + amzdate + '\n'
 
 # Step 5: Create the list of signed headers. This lists the headers
 # in the canonical_headers list, delimited with ";" and in alpha order.
@@ -96,7 +95,7 @@ canonical_request = method + '\n' + canonical_uri + '\n' + canonical_querystring
 # Match the algorithm to the hashing algorithm you use, either SHA-1 or
 # SHA-256 (recommended)
 algorithm = 'AWS4-HMAC-SHA256'
-credential_scope = datestamp + '/' + region + '/' + service + '/' + 'aws4_request'
+credential_scope = f'{datestamp}/{region}/{service}/aws4_request'
 string_to_sign = algorithm + '\n' +  amzdate + '\n' +  credential_scope + '\n' +  hashlib.sha256(canonical_request.encode('utf-8')).hexdigest()
 
 # ************* TASK 3: CALCULATE THE SIGNATURE *************
@@ -111,7 +110,7 @@ signature = hmac.new(signing_key, (string_to_sign).encode('utf-8'), hashlib.sha2
 # The signing information can be either in a query string value or in 
 # a header named Authorization. This code shows how to use a header.
 # Create authorization header and add to request headers
-authorization_header = algorithm + ' ' + 'Credential=' + access_key + '/' + credential_scope + ', ' +  'SignedHeaders=' + signed_headers + ', ' + 'Signature=' + signature
+authorization_header = f'{algorithm} Credential={access_key}/{credential_scope}, SignedHeaders={signed_headers}, Signature={signature}'
 
 # The request can include any headers, but MUST include "host", "x-amz-date", 
 # and (for this scenario) "Authorization". "host" and "x-amz-date" must
@@ -122,10 +121,10 @@ headers = {'x-amz-date':amzdate, 'Authorization':authorization_header}
 
 
 # ************* SEND THE REQUEST *************
-request_url = endpoint + '?' + canonical_querystring
+request_url = f'{endpoint}?{canonical_querystring}'
 
 print('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
-print('Request URL = ' + request_url)
+print(f'Request URL = {request_url}')
 r = requests.get(request_url, headers=headers)
 
 print('\nRESPONSE++++++++++++++++++++++++++++++++++++')

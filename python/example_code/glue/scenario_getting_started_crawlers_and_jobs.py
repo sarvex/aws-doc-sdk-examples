@@ -131,19 +131,21 @@ class GlueCrawlerJobScenario:
             self.wait(10)
             crawler = wrapper.get_crawler(crawler_name)
             crawler_state = crawler['State']
-            print(f"Crawler is {crawler['State']}.")
+            print(f"Crawler is {crawler_state}.")
         print('-'*88)
 
         database = wrapper.get_database(db_name)
         print(f"The crawler created database {db_name}:")
         pprint(database)
-        print(f"The database contains these tables:")
+        print("The database contains these tables:")
         tables = wrapper.get_tables(db_name)
         for index, table in enumerate(tables):
             print(f"\t{index + 1}. {table['Name']}")
         table_index = Question.ask_question(
-            f"Enter the number of a table to see more detail: ",
-            Question.is_int, Question.in_range(1, len(tables)))
+            "Enter the number of a table to see more detail: ",
+            Question.is_int,
+            Question.in_range(1, len(tables)),
+        )
         pprint(tables[table_index - 1])
         print('-'*88)
 
@@ -158,7 +160,7 @@ class GlueCrawlerJobScenario:
         print("In this example, the data is transformed from CSV to JSON, and only a few "
               "fields are included in the output.")
         job_run_status = None
-        if Question.ask_question(f"Ready to run? (y/n) ", Question.is_yesno):
+        if Question.ask_question("Ready to run? (y/n) ", Question.is_yesno):
             job_run_id = wrapper.start_job_run(
                 job_name, db_name, tables[0]['Name'], self.glue_bucket.name)
             print(f"Job {job_name} started. Let's wait for it to run.")
@@ -192,16 +194,14 @@ class GlueCrawlerJobScenario:
                 raise
             print('-'*88)
 
-        job_names = wrapper.list_jobs()
-        if job_names:
+        if job_names := wrapper.list_jobs():
             print(f"Your account has {len(job_names)} jobs defined:")
             for index, job_name in enumerate(job_names):
                 print(f"\t{index + 1}. {job_name}")
             job_index = Question.ask_question(
                 f"Enter a number between 1 and {len(job_names)} to see the list of runs for "
                 f"a job: ", Question.is_int, Question.in_range(1, len(job_names)))
-            job_runs = wrapper.get_job_runs(job_names[job_index - 1])
-            if job_runs:
+            if job_runs := wrapper.get_job_runs(job_names[job_index - 1]):
                 print(f"Found {len(job_runs)} runs for job {job_names[job_index - 1]}:")
                 for index, job_run in enumerate(job_runs):
                     print(

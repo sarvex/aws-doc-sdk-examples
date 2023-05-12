@@ -175,7 +175,7 @@ class Ec2InstanceScenario:
         elastic_ip = self.eip_wrapper.allocate()
         print(f"Allocated static Elastic IP address: {elastic_ip.public_ip}.")
         self.eip_wrapper.associate(self.inst_wrapper.instance)
-        print(f"Associated your Elastic IP with your instance.")
+        print("Associated your Elastic IP with your instance.")
         print("You can now use SSH to connect to your instance by using the Elastic IP.")
         self._display_ssh_info()
 

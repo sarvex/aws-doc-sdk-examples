@@ -34,11 +34,12 @@ class Question:
         :param questions: The list of questions to ask.
         :return: A dict of answers.
         """
-        answers = {}
-        for question in questions:
-            answers[question.key] = Question.ask_question(
-                question.question, *question.validators)
-        return answers
+        return {
+            question.key: Question.ask_question(
+                question.question, *question.validators
+            )
+            for question in questions
+        }
 
     @staticmethod
     def ask_question(question, *validators):

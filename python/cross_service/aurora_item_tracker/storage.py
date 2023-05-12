@@ -69,9 +69,8 @@ class Storage:
                     'The Aurora Data Service is not ready, probably because it entered '
                     'pause mode after a period of inactivity. Wait a minute for '
                     'your cluster to resume and try your request again.') from error
-            else:
-                logger.exception("Run statement on %s failed.", self._db_name)
-                raise StorageError(error)
+            logger.exception("Run statement on %s failed.", self._db_name)
+            raise StorageError(error)
         else:
             return result
 
@@ -92,15 +91,17 @@ class Storage:
         sql = f"{sql_select} FROM {self._table_name} {sql_where}"
         print(sql)
         results = self._run_statement(sql, sql_params=sql_params)
-        output = [{
-            'iditem': record[0]['longValue'],
-            'description': record[1]['stringValue'],
-            'guide': record[2]['stringValue'],
-            'status': record[3]['stringValue'],
-            'username': record[4]['stringValue'],
-            'archived': record[5]['booleanValue']
-        } for record in results['records']]
-        return output
+        return [
+            {
+                'iditem': record[0]['longValue'],
+                'description': record[1]['stringValue'],
+                'guide': record[2]['stringValue'],
+                'status': record[3]['stringValue'],
+                'username': record[4]['stringValue'],
+                'archived': record[5]['booleanValue'],
+            }
+            for record in results['records']
+        ]
 
     def add_work_item(self, work_item):
         """
@@ -120,8 +121,7 @@ class Storage:
             {'name': 'username', 'value': {'stringValue': work_item['username']}},
         ]
         results = self._run_statement(sql, sql_params=sql_params)
-        work_item_id = results['generatedFields'][0]['longValue']
-        return work_item_id
+        return results['generatedFields'][0]['longValue']
 
     def archive_work_item(self, iditem):
         """

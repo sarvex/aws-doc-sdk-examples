@@ -27,7 +27,7 @@ def swiftbuild(test, run, packages, swiftc_options):
                 results = results + ((path, output),)
 #            else:
 #                print(f"Directory {path} is not a Swift project. Skipping.")
-    
+
     # Display a table of build results.
 
     if num_packages_found != 0:
@@ -42,12 +42,9 @@ def swiftbuild(test, run, packages, swiftc_options):
         if value != 0:
             fails = fails + 1
             outcome_str = "Fail"
-        
+
         num_parts = len(path.parts)
-        if num_parts > 1:
-            parent = path.parts[num_parts - 2]
-        else:
-            parent = ""
+        parent = path.parts[num_parts - 2] if num_parts > 1 else ""
         short_path = f"{parent}{os.sep}{path.name}"
 
         short_path = str(short_path)
@@ -55,7 +52,7 @@ def swiftbuild(test, run, packages, swiftc_options):
         if short_path_len > 64:
             short_path = f"...{short_path[-61:]}"
         print("{0:.<65} {1}".format(f"{short_path} ", outcome_str))
-        
+
     print(f"\nBuilt {num_packages_found} project(s) with {fails} failure(s).")
     print_configuration(test, swiftc_options)
 
@@ -79,12 +76,10 @@ def print_configuration(test, swiftc_options):
 # Returns the returncode from the `swift` command.
 def build_package(test, run, package, swiftc_options):
     packagefile_path = package / "Package.swift"
-    is_package = False
-
     if not packagefile_path.is_file():
+        is_package = False
+
         return 1, is_package
-    
-    is_package = True
 
     if test == True:
         build_command = "test"
@@ -95,18 +90,18 @@ def build_package(test, run, package, swiftc_options):
     else:
         build_command = "build"
         command_gerund = "building"
-    
+
     command_parts = ["swift", build_command]
 
     for opt in swiftc_options:
         command_parts = command_parts + ["-Xswiftc", opt]
-    
+
     print(f"Now {command_gerund} project in {package}...")
     # print(command_parts)
 
     results = subprocess.run(command_parts, cwd=package)
     print("="*72, "\n")
-    return results.returncode, is_package
+    return results.returncode, True
 
 
 if __name__ == "__main__":

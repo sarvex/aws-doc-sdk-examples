@@ -90,10 +90,11 @@ class AuditReport:
                         controlSetId=folder_id,
                         evidenceFolderId=folder_id,
                         maxResults=1000)
-                    selected_evidence_list = []
-                    for evidence in evidence_list.get('evidence'):
-                        if evidence.get('assessmentReportSelection') == 'Yes':
-                            selected_evidence_list.append(evidence.get('id'))
+                    selected_evidence_list = [
+                        evidence.get('id')
+                        for evidence in evidence_list.get('evidence')
+                        if evidence.get('assessmentReportSelection') == 'Yes'
+                    ]
                     print(f"Removing evidence report selection : {folder.get('name')} "
                           f"{len(selected_evidence_list)}")
                     self.auditmanager_client.batch_disassociate_assessment_report_evidence(
@@ -133,8 +134,7 @@ class AuditReport:
                   "the report.")
 
     def _is_report_generated(self, assessment_report_id):
-        max_wait_time = 0
-        while max_wait_time < 900:
+        for _ in range(0, 900, 5):
             print(f"Checking status of the report {assessment_report_id}")
             report_list = self.auditmanager_client.list_assessment_reports(maxResults=1)
             if (report_list.get('assessmentReports')[0].get('id') == assessment_report_id
@@ -142,7 +142,6 @@ class AuditReport:
                 return True
             print('Sleeping for 5 seconds...')
             time.sleep(5)
-            max_wait_time += 5
 
 
 def run_demo():

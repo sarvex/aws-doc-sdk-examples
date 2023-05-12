@@ -51,6 +51,5 @@ def lambda_handler(event, context):
     except ZeroDivisionError:
         logger.warning("I can't divide %s by 0!", x)
 
-    response = {'result': result}
-    return response
+    return {'result': result}
 # snippet-end:[gov2.lambda.handlers.arithmetic]

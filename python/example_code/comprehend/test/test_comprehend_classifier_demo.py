@@ -33,11 +33,11 @@ def test_get_training_issues(monkeypatch, status_code, training):
         got_issues = classifier_demo.get_input_issues(labels)
     if status_code == 200:
         assert len(got_issues) == 9
-        assert all([',' not in issue['title'] for issue in got_issues])
-        assert all(['\r' not in issue['body'] for issue in got_issues])
-        assert all(['\n' not in issue['body'] for issue in got_issues])
+        assert all(',' not in issue['title'] for issue in got_issues)
+        assert all('\r' not in issue['body'] for issue in got_issues)
+        assert all('\n' not in issue['body'] for issue in got_issues)
         if training:
-            assert all([issue['labels'] - labels == set() for issue in got_issues])
+            assert all(issue['labels'] - labels == set() for issue in got_issues)
         else:
             assert all([issue['labels']] for issue in got_issues)
     else:

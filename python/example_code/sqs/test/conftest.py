@@ -34,17 +34,15 @@ def fixture_make_queue(request, make_unique_name):
         queue_name = make_unique_name('queue')
         sqs_stubber.add_response(
             'create_queue',
-            expected_params={
-                'QueueName': queue_name,
-                'Attributes': {}
-            },
-            service_response={'QueueUrl': 'url-' + queue_name}
+            expected_params={'QueueName': queue_name, 'Attributes': {}},
+            service_response={'QueueUrl': f'url-{queue_name}'},
         )
         queue = sqs_resource.create_queue(QueueName=queue_name, Attributes={})
 
         def fin():
             if not sqs_stubber.use_stubs:
                 queue.delete()
+
         request.addfinalizer(fin)
 
         return queue

@@ -65,7 +65,7 @@ class AliasManager:
                     logging.error(
                         "Couldn't delete key. Here's why: %s", err.response['Error']['Message'])
                 else:
-                    print(f"Key scheduled for deletion in 7 days.")
+                    print("Key scheduled for deletion in 7 days.")
 
 # snippet-start:[python.example_code.kms.CreateAlias]
     def create_alias(self, key_id):
@@ -76,7 +76,7 @@ class AliasManager:
         :return: The alias given to the key.
         """
         alias = ''
-        while alias == '':
+        while not alias:
             alias = input(f"What alias would you like to give to key {key_id}? ")
         try:
             self.kms_client.create_alias(AliasName=alias, TargetKeyId=key_id)
@@ -145,7 +145,7 @@ class AliasManager:
         """
         Deletes an alias.
         """
-        alias = input(f"Enter an alias that you'd like to delete: ")
+        alias = input("Enter an alias that you'd like to delete: ")
         if alias != '':
             try:
                 self.kms_client.delete_alias(AliasName=alias)

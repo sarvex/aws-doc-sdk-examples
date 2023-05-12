@@ -85,8 +85,7 @@ def create_manifest_file(csv_file, manifest_file, s3_path):
     image_count = 0
     label_count = 0
 
-    with open(csv_file, newline='', encoding="UTF-8") as csvfile,\
-            open(manifest_file, "w", encoding="UTF-8") as output_file:
+    with (open(csv_file, newline='', encoding="UTF-8") as csvfile, open(manifest_file, "w", encoding="UTF-8") as output_file):
 
         image_classifications = csv.reader(
             csvfile, delimiter=',', quotechar='|')
@@ -98,9 +97,7 @@ def create_manifest_file(csv_file, manifest_file, s3_path):
             image_count += 1
 
             # Create JSON for image source ref.
-            json_line = {}
-            json_line['source-ref'] = source_ref
-
+            json_line = {'source-ref': source_ref}
             # Process each image level label.
             for index in range(1, len(row)):
                 image_level_label = row[index]
@@ -112,18 +109,19 @@ def create_manifest_file(csv_file, manifest_file, s3_path):
 
                # Create the JSON line metadata.
                 json_line[image_level_label] = 1
-                metadata = {}
-                metadata['confidence'] = 1
-                metadata['job-name'] = 'labeling-job/' + image_level_label
-                metadata['class-name'] = image_level_label
-                metadata['human-annotated'] = "yes"
-                metadata['creation-date'] = \
-                    datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')
-                metadata['type'] = "groundtruth/image-classification"
-
+                metadata = {
+                    'confidence': 1,
+                    'job-name': f'labeling-job/{image_level_label}',
+                    'class-name': image_level_label,
+                    'human-annotated': "yes",
+                    'creation-date': datetime.now(timezone.utc).strftime(
+                        '%Y-%m-%dT%H:%M:%S.%f'
+                    ),
+                    'type': "groundtruth/image-classification",
+                }
                 json_line[f'{image_level_label}-metadata'] = metadata
 
-                # Write the image JSON Line.
+                            # Write the image JSON Line.
             output_file.write(json.dumps(json_line))
             output_file.write('\n')
 

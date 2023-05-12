@@ -105,12 +105,17 @@ class ConformancePack:
         """
         try:
             print('Creating custom framework...')
-            custom_framework = self.auditmanager_client.create_assessment_framework(
-                name='Config-Conformance-pack-' + cpack_name,
-                controlSets=[{'name': cpack_name, 'controls': am_control_ids}])
-            print(f"Successfully created the custom framework: ",
-                  f"{custom_framework.get('framework').get('name')}: ",
-                  f"{custom_framework.get('framework').get('id')}")
+            custom_framework = (
+                self.auditmanager_client.create_assessment_framework(
+                    name=f'Config-Conformance-pack-{cpack_name}',
+                    controlSets=[{'name': cpack_name, 'controls': am_control_ids}],
+                )
+            )
+            print(
+                "Successfully created the custom framework: ",
+                f"{custom_framework.get('framework').get('name')}: ",
+                f"{custom_framework.get('framework').get('id')}",
+            )
             print('-' * 88)
         except ClientError:
             logger.exception("Failed to create custom framework.")

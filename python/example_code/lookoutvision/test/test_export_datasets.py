@@ -121,11 +121,17 @@ def test_upload_manifest_file(make_stubber, stub_runner, error_code, stop_on_met
 
     with stub_runner(error_code, stop_on_method) as runner:
 
-        runner.add(s3_stubber.stub_put_object, dest_bucket_name,
-                   manifest_folder + "/" + manifest_file)
+        runner.add(
+            s3_stubber.stub_put_object,
+            dest_bucket_name,
+            f"{manifest_folder}/{manifest_file}",
+        )
         if error_code is None:
-            runner.add(s3_stubber.stub_head_object,
-                       dest_bucket_name, manifest_folder + "/" + manifest_file)
+            runner.add(
+                s3_stubber.stub_head_object,
+                dest_bucket_name,
+                f"{manifest_folder}/{manifest_file}",
+            )
 
     if error_code is None:
         upload_manifest_file(

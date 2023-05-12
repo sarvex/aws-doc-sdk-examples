@@ -198,8 +198,11 @@ def create_lambda_function(iam_role, function_name, function_file_name, handler,
                 Publish=True
             ), 'InvalidParameterValueException', 5)
         function_arn = response['FunctionArn']
-        logger.info("Created function '%s' with ARN: '%s'.",
-                    function_name, response['FunctionArn'])
+        logger.info(
+            "Created function '%s' with ARN: '%s'.",
+            function_name,
+            function_arn,
+        )
     except ClientError:
         logger.exception("Couldn't create function %s.", function_name)
         raise

@@ -33,15 +33,14 @@ class Renderer:
         }
         if svc_folder is not None:
             self.lang_config['service_folder'] = svc_folder
+        elif 'service_folder' in self.lang_config:
+            svc_folder_tmpl = jinja2.Environment(
+                loader=jinja2.BaseLoader()).from_string(self.lang_config['service_folder'])
+            self.lang_config['service_folder'] = svc_folder_tmpl.render(service=service_info)
         else:
-            if 'service_folder' in self.lang_config:
-                svc_folder_tmpl = jinja2.Environment(
-                    loader=jinja2.BaseLoader()).from_string(self.lang_config['service_folder'])
-                self.lang_config['service_folder'] = svc_folder_tmpl.render(service=service_info)
-            else:
-                raise MissingMetadataError(
-                    "Service folder not found. You must either specify a service_folder template in config.py or\n"
-                    "as a command line --svc_folder argument.")
+            raise MissingMetadataError(
+                "Service folder not found. You must either specify a service_folder template in config.py or\n"
+                "as a command line --svc_folder argument.")
         sdk_api_ref_tmpl = jinja2.Environment(loader=jinja2.BaseLoader()).from_string(self.lang_config['sdk_api_ref'])
         self.lang_config['sdk_api_ref'] = sdk_api_ref_tmpl.render(service=service_info)
         self.safe = safe
@@ -117,11 +116,14 @@ class Renderer:
         pre_crosses = self.scanner.crosses()
         post_crosses = []
         for _, pre in pre_crosses.items():
-            github = None
-            for ver in pre['languages'][self.scanner.lang_name]['versions']:
-                if ver['sdk_version'] == self.sdk_ver:
-                    github = ver.get('github')
-                    break
+            github = next(
+                (
+                    ver.get('github')
+                    for ver in pre['languages'][self.scanner.lang_name]['versions']
+                    if ver['sdk_version'] == self.sdk_ver
+                ),
+                None,
+            )
             if github is None:
                 logger.warning("GitHub path not specified for cross-service example: %s.", pre['title_abbrev'])
             else:
@@ -153,7 +155,7 @@ class Renderer:
         section = None
         subsection = None
         with open(readme_filename, 'r', encoding='utf-8') as readme:
-            for line in readme.readlines():
+            for line in readme:
                 if line.lstrip().startswith('<!--custom') and line.rstrip().endswith('start-->'):
                     tag_parts = line.split('.')
                     section = tag_parts[1]

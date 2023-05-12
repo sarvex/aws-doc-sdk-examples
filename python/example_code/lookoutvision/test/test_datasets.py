@@ -120,9 +120,7 @@ def test_update_dataset_entries(make_stubber, error_code):
     project_name = 'test-project_name'
     updates_file = 'test/test_manifests/updates.manifest'
     dataset_type = 'train'
-    status_complete = 'UPDATE_COMPLETE'
     status_running = 'UPDATE_IN_PROGRESS'
-    message = 'Test message'
     changes = ""
 
 
@@ -133,6 +131,8 @@ def test_update_dataset_entries(make_stubber, error_code):
         project_name, dataset_type, changes, status_running,
         error_code=error_code)
     if error_code is None:
+        status_complete = 'UPDATE_COMPLETE'
+        message = 'Test message'
         lookoutvision_stubber.stub_describe_dataset(
             project_name, dataset_type, status_complete, message)
 

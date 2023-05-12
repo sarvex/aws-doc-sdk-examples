@@ -48,9 +48,9 @@ def get_routing_control_state(routing_control_arn, cluster_endpoints):
     for cluster_endpoint in cluster_endpoints:
         try:
             recovery_client = create_recovery_client(cluster_endpoint)
-            response = recovery_client.get_routing_control_state(
-                RoutingControlArn=routing_control_arn)
-            return response
+            return recovery_client.get_routing_control_state(
+                RoutingControlArn=routing_control_arn
+            )
         except Exception as error:
             print(error)
             raise error
@@ -76,10 +76,10 @@ def update_routing_control_state(
     for cluster_endpoint in cluster_endpoints:
         try:
             recovery_client = create_recovery_client(cluster_endpoint)
-            response = recovery_client.update_routing_control_state(
+            return recovery_client.update_routing_control_state(
                 RoutingControlArn=routing_control_arn,
-                RoutingControlState=routing_control_state)
-            return response
+                RoutingControlState=routing_control_state,
+            )
         except Exception as error:
             print(error)
 # snippet-end:[python.example_code.route53-recovery-cluster.UpdateRoutingControlState]
@@ -99,11 +99,12 @@ def toggle_routing_control_state(routing_control_arn, cluster_endpoints):
 
     update_state = 'Off' if state == 'On' else 'On'
     print(f"Setting control state to '{update_state}'.")
-    response = update_routing_control_state(routing_control_arn, cluster_endpoints, update_state)
-    if response:
+    if response := update_routing_control_state(
+        routing_control_arn, cluster_endpoints, update_state
+    ):
         print('Success!')
     else:
-        print(f'Something went wrong.')
+        print('Something went wrong.')
     print('-'*88)
 # snippet-end:[python.example_code.route53-recovery-cluster.Scenario_SetControlState]
 

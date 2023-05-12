@@ -31,7 +31,7 @@ class SecurityHub:
         page = 1
         sechub_control_list = []
         while True:
-            print("Page [" + str(page) + "]")
+            print(f"Page [{str(page)}]")
             if next_token is None:
                 control_list = self.auditmanager_client.list_controls(
                     controlType='Standard',

@@ -36,11 +36,10 @@ def sign(key, msg):
     return hmac.new(key, msg.encode('utf-8'), hashlib.sha256).digest()
 
 def getSignatureKey(key, dateStamp, regionName, serviceName):
-    kDate = sign(('AWS4' + key).encode('utf-8'), dateStamp)
+    kDate = sign(f'AWS4{key}'.encode('utf-8'), dateStamp)
     kRegion = sign(kDate, regionName)
     kService = sign(kRegion, serviceName)
-    kSigning = sign(kService, 'aws4_request')
-    return kSigning
+    return sign(kService, 'aws4_request')
 
 # Read AWS access key from env. variables or configuration file. Best practice is NOT
 # to embed credentials in code.
@@ -75,23 +74,22 @@ canonical_uri = '/'
 # signed_headers is the list of headers that are being included
 # as part of the signing process. For requests that use query strings,
 # only "host" is included in the signed headers.
-canonical_headers = 'host:' + host + '\n'
+canonical_headers = f'host:{host}' + '\n'
 signed_headers = 'host'
 
 # Match the algorithm to the hashing algorithm you use, either SHA-1 or
 # SHA-256 (recommended)
 algorithm = 'AWS4-HMAC-SHA256'
-credential_scope = datestamp + '/' + region + '/' + service + '/' + 'aws4_request'
+credential_scope = f'{datestamp}/{region}/{service}/aws4_request'
 
-# Step 4: Create the canonical query string. In this example, request
-# parameters are in the query string. Query string values must
-# be URL-encoded (space=%20). The parameters must be sorted by name.
-canonical_querystring = 'Action=CreateUser&UserName=NewUser&Version=2010-05-08'
-canonical_querystring += '&X-Amz-Algorithm=AWS4-HMAC-SHA256'
-canonical_querystring += '&X-Amz-Credential=' + urllib.parse.quote_plus(access_key + '/' + credential_scope)
-canonical_querystring += '&X-Amz-Date=' + amz_date
+canonical_querystring = (
+    'Action=CreateUser&UserName=NewUser&Version=2010-05-08'
+    + '&X-Amz-Algorithm=AWS4-HMAC-SHA256'
+)
+canonical_querystring += f"&X-Amz-Credential={urllib.parse.quote_plus(f'{access_key}/{credential_scope}')}"
+canonical_querystring += f'&X-Amz-Date={amz_date}'
 canonical_querystring += '&X-Amz-Expires=30'
-canonical_querystring += '&X-Amz-SignedHeaders=' + signed_headers
+canonical_querystring += f'&X-Amz-SignedHeaders={signed_headers}'
 
 # Step 5: Create payload hash. For GET requests, the payload is an
 # empty string ("").
@@ -116,16 +114,16 @@ signature = hmac.new(signing_key, (string_to_sign).encode("utf-8"), hashlib.sha2
 # The auth information can be either in a query string
 # value or in a header named Authorization. This code shows how to put
 # everything into a query string.
-canonical_querystring += '&X-Amz-Signature=' + signature
+canonical_querystring += f'&X-Amz-Signature={signature}'
 
 
 # ************* SEND THE REQUEST *************
 # The 'host' header is added automatically by the Python 'request' lib. But it
 # must exist as a header in the request.
-request_url = endpoint + "?" + canonical_querystring
+request_url = f"{endpoint}?{canonical_querystring}"
 
 print('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
-print('Request URL = ' + request_url)
+print(f'Request URL = {request_url}')
 r = requests.get(request_url)
 
 print('\nRESPONSE++++++++++++++++++++++++++++++++++++')

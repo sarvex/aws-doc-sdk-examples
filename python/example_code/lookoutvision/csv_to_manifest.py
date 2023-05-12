@@ -40,9 +40,7 @@ def check_errors(csv_file):
     errors_file = f"{os.path.splitext(csv_file)[0]}_errors.csv"
     deduplicated_file = f"{os.path.splitext(csv_file)[0]}_deduplicated.csv"
 
-    with open(csv_file, 'r', encoding="UTF-8") as input_file,\
-            open(deduplicated_file, 'w', encoding="UTF-8") as dedup,\
-            open(errors_file, 'w', encoding="UTF-8") as errors:
+    with (open(csv_file, 'r', encoding="UTF-8") as input_file, open(deduplicated_file, 'w', encoding="UTF-8") as dedup, open(errors_file, 'w', encoding="UTF-8") as errors):
 
         reader = csv.reader(input_file, delimiter=',')
         dedup_writer = csv.writer(dedup)
@@ -56,7 +54,7 @@ def check_errors(csv_file):
                 continue
 
             # Record any incorrect classifications.
-            if not row[1].lower() == "normal" and not row[1].lower() == "anomaly":
+            if row[1].lower() not in ["normal", "anomaly"]:
                 error_writer.writerow(
                     [line, row[0], row[1], "INVALID_CLASSIFICATION"])
                 errors_found = True
@@ -67,7 +65,7 @@ def check_errors(csv_file):
                 dedup_writer.writerow(row)
                 entries.add(key)
             else:
-                error_writer.writerow([line, row[0], row[1], "DUPLICATE"])
+                error_writer.writerow([line, key, row[1], "DUPLICATE"])
                 errors_found = True
             line += 1
 
@@ -92,8 +90,7 @@ def create_manifest_file(csv_file, manifest_file, s3_path):
     image_count = 0
     anomalous_count = 0
 
-    with open(csv_file, newline='', encoding="UTF-8") as csvfile,\
-        open(manifest_file, "w", encoding="UTF-8") as output_file:
+    with (open(csv_file, newline='', encoding="UTF-8") as csvfile, open(manifest_file, "w", encoding="UTF-8") as output_file):
 
         image_classifications = csv.reader(
             csvfile, delimiter=',', quotechar='|')
@@ -112,18 +109,17 @@ def create_manifest_file(csv_file, manifest_file, s3_path):
                 anomalous_count += 1
 
            # Create the JSON line.
-            json_line = {}
-            json_line['source-ref'] = source_ref
-            json_line['anomaly-label'] = str(classification)
-
-            metadata = {}
-            metadata['confidence'] = 1
-            metadata['job-name'] = "labeling-job/anomaly-classification"
-            metadata['class-name'] = row[1]
-            metadata['human-annotated'] = "yes"
-            metadata['creation-date'] = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')
-            metadata['type'] = "groundtruth/image-classification"
-
+            json_line = {'source-ref': source_ref, 'anomaly-label': str(classification)}
+            metadata = {
+                'confidence': 1,
+                'job-name': "labeling-job/anomaly-classification",
+                'class-name': row[1],
+                'human-annotated': "yes",
+                'creation-date': datetime.now(timezone.utc).strftime(
+                    '%Y-%m-%dT%H:%M:%S.%f'
+                ),
+                'type': "groundtruth/image-classification",
+            }
             json_line['anomaly-label-metadata'] = metadata
 
             output_file.write(json.dumps(json_line))
@@ -171,7 +167,7 @@ def main():
 
         csv_file = args.csv_file
         csv_file_no_extension = os.path.splitext(csv_file)[0]
-        manifest_file = csv_file_no_extension + '.manifest'
+        manifest_file = f'{csv_file_no_extension}.manifest'
 
         # Create manifest file if there are no duplicate images.
         if check_errors(csv_file):

@@ -103,7 +103,7 @@ class Report(MethodView):
         try:
             work_items = self.storage.get_work_items(archived=False)
             snap_time = datetime.now()
-            logger.info(f"Sending report of %s items to %s.", len(work_items), email)
+            logger.info("Sending report of %s items to %s.", len(work_items), email)
             html_report = render_template(
                 'report.html', work_items=work_items, item_count=len(work_items), snap_time=snap_time)
             csv_items = self._render_csv(work_items)
@@ -120,10 +120,13 @@ class Report(MethodView):
                     Source=self.email_sender,
                     Destination={'ToAddresses': [email]},
                     Message={
-                        'Subject': {'Data': f"Work items"},
+                        'Subject': {'Data': "Work items"},
                         'Body': {
                             'Html': {'Data': html_report},
-                            'Text': {'Data': text_report}}})
+                            'Text': {'Data': text_report},
+                        },
+                    },
+                )
         except StorageError as err:
             logger.exception(
                 "Couldn't get work items from storage. Here's why: %s", err)

@@ -258,8 +258,7 @@ class LambdaWrapper:
             for func_page in func_paginator.paginate():
                 for func in func_page['Functions']:
                     print(func['FunctionName'])
-                    desc = func.get('Description')
-                    if desc:
+                    if desc := func.get('Description'):
                         print(f"\t{desc}")
                     print(f"\t{func['Runtime']}: {func['Handler']}")
         except ClientError as err:

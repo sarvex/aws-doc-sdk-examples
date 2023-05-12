@@ -198,5 +198,7 @@ def test_delete_messages_not_exist(make_stubber, make_queue):
     response = message_wrapper.delete_messages(queue, messages)
 
     assert len(response['Failed']) == len(messages)
-    assert all([failed['Code'] == 'ReceiptHandleIsInvalid'
-                for failed in response['Failed']])
+    assert all(
+        failed['Code'] == 'ReceiptHandleIsInvalid'
+        for failed in response['Failed']
+    )

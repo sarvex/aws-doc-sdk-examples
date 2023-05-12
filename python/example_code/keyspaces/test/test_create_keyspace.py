@@ -20,14 +20,12 @@ class MockManager:
 
     def setup_stubs(self, error, stop_on, stubber):
         with self.stub_runner(error, stop_on) as runner:
-            if self.ks_exists:
-                runner.add(stubber.stub_get_keyspace, self.ks_name, self.ks_arn)
-            else:
+            if not self.ks_exists:
                 runner.add(
                     stubber.stub_get_keyspace, self.ks_name, self.ks_arn,
                     error_code='ResourceNotFoundException')
                 runner.add(stubber.stub_create_keyspace, self.ks_name, self.ks_arn)
-                runner.add(stubber.stub_get_keyspace, self.ks_name, self.ks_arn)
+            runner.add(stubber.stub_get_keyspace, self.ks_name, self.ks_arn)
             runner.add(stubber.stub_list_keyspaces, self.keyspaces)
 
 

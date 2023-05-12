@@ -398,8 +398,7 @@ def run_scenario(table_name, movie_file_name, dyn_resource):
         release_year = Question.ask_question(
             f"\nLet's get a list of movies released in a given year. Enter a year between "
             f"1972 and 2018: ", Question.is_int, Question.in_range(1972, 2018))
-        releases = movies.query_movies(release_year)
-        if releases:
+        if releases := movies.query_movies(release_year):
             print(f"There were {len(releases)} movies released in {release_year}:")
             for release in releases:
                 print(f"\t{release['title']}")
@@ -417,8 +416,7 @@ def run_scenario(table_name, movie_file_name, dyn_resource):
         Question(
             'second', "Now enter another year: ",
             Question.is_int, Question.in_range(1972, 2018))])
-    releases = movies.scan_movies(years)
-    if releases:
+    if releases := movies.scan_movies(years):
         count = Question.ask_question(
             f"\nFound {len(releases)} movies. How many do you want to see? ",
             Question.is_int, Question.in_range(1, len(releases)))

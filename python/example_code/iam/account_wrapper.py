@@ -227,7 +227,7 @@ def usage_demo():
     current_aliases = list_aliases()
     print(f"Your account alias is now {current_aliases}.")
     delete_alias(current_aliases[0])
-    print(f"Your account now has no alias.")
+    print("Your account now has no alias.")
     if len(old_aliases) > 0:
         print(f"Restoring your original alias back to {old_aliases[0]}...")
         create_alias(old_aliases[0])
@@ -252,7 +252,7 @@ def usage_demo():
     print(f"Got credentials report. Showing only the first {col_count} columns.")
     cred_lines = [line.split(',')[:col_count] for line
                   in cred_report.decode('utf-8').split('\n')]
-    col_width = max([len(item) for line in cred_lines for item in line]) + 2
+    col_width = max(len(item) for line in cred_lines for item in line) + 2
     for line in cred_report.decode('utf-8').split('\n'):
         print(''.join(element.ljust(col_width)
                       for element in line.split(',')[:col_count]))
@@ -277,12 +277,11 @@ def usage_demo():
         while True:
             if print_password_policy():
                 break
+            answer = input("Do you want to create a default password policy (y/n)? ")
+            if answer.lower() == 'y':
+                pw_policy_created = iam.create_account_password_policy()
             else:
-                answer = input("Do you want to create a default password policy (y/n)? ")
-                if answer.lower() == 'y':
-                    pw_policy_created = iam.create_account_password_policy()
-                else:
-                    break
+                break
     if pw_policy_created is not None:
         answer = input("Do you want to delete the password policy (y/n)? ")
         if answer.lower() == 'y':

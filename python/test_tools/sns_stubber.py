@@ -31,7 +31,7 @@ class SnsStubber(ExampleStubber):
 
     def stub_create_topic(self, topic_name, topic_arn, error_code=None):
         expected_params = {'Name': topic_name}
-        response = {f'TopicArn': topic_arn}
+        response = {'TopicArn': topic_arn}
         self._stub_bifurcator(
             'create_topic', expected_params, response, error_code=error_code)
 

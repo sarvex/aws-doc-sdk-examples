@@ -217,8 +217,7 @@ def usage_demo(table):
         f"\nYou can combine query conditions, such as to query for movies released in"
         f"\na certain year that start with letters in a range, and you can "
         f"\nproject the output to return only the fields that you want.")
-    releases = wrapper.query_and_project_movies(release_year, letters)
-    if releases:
+    if releases := wrapper.query_and_project_movies(release_year, letters):
         print(f"\nFound {len(releases)} movies released in {release_year} with titles"
               f"\nthat start between {letters['first']} and {letters['second']}. They are:")
         pprint(releases)

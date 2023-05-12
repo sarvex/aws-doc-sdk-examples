@@ -59,7 +59,7 @@ class ExponentialRetry:
                     print(f"Sleeping for {sleepy_time} to give AWS time to "
                           f"connect resources.")
                     time.sleep(sleepy_time)
-                    sleepy_time = sleepy_time*2
+                    sleepy_time *= 2
                 else:
                     logger.error(
                         "%s raised an error and cannot be retried.", self.func.__name__)

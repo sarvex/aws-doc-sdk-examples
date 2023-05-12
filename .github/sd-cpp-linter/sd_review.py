@@ -64,15 +64,7 @@ class Commit:
         """Download the compare diff, return a list of PatchedFile"""
         diffs = self.get_for_compare("diff", f"/main...{self.head_ref}")
 
-    # PatchSet is the easiest way to construct what we want, but the
-    # diff_line_no property on lines is counted from the top of the
-    # whole PatchSet, whereas GitHub is expecting the "position"
-    # property to be line count within each file's diff. So we need to
-    # do this  bit of faff to get a list of file-diffs with
-    # their own diff_line_no range
-        diff = [unidiff.PatchSet(str(file))[0] for file in unidiff.PatchSet(diffs)]
-
-        return diff
+        return [unidiff.PatchSet(str(file))[0] for file in unidiff.PatchSet(diffs)]
 
 
 class PullRequest:
@@ -110,14 +102,7 @@ class PullRequest:
 
         diffs = self.get("v3.diff")
 
-        # PatchSet is the easiest way to construct what we want, but the
-        # diff_line_no property on lines is counted from the top of the
-        # whole PatchSet, whereas GitHub is expecting the "position"
-        # property to be line count within each file's diff. So we need to
-        # do this bit of faff to get a list of file-diffs with
-        # their own diff_line_no range
-        diff = [unidiff.PatchSet(str(file))[0] for file in unidiff.PatchSet(diffs)]
-        return diff
+        return [unidiff.PatchSet(str(file))[0] for file in unidiff.PatchSet(diffs)]
 
 
 @contextlib.contextmanager
@@ -217,10 +202,14 @@ def find_line_number_from_offset(offset_lookup, filename, offset):
         # Let's make sure we've the file offsets for this other file
         offset_lookup.update(make_file_offset_lookup([name]))
 
-    for line_num, line_offset in enumerate(offset_lookup[name]):
-        if line_offset > offset:
-            return line_num - 1
-    return -1
+    return next(
+        (
+            line_num - 1
+            for line_num, line_offset in enumerate(offset_lookup[name])
+            if line_offset > offset
+        ),
+        -1,
+    )
 
 
 def read_one_line(filename, line_offset):
@@ -312,14 +301,16 @@ def replace_one_line(replacement_set, line_num, offset_lookup):
 
     insert_offsets.append((None, None))
 
-    fragments = []
-    for (_, start), (end, _) in zip(insert_offsets[:-1], insert_offsets[1:]):
-        fragments.append(source_line[start:end])
-
-    new_line = ""
-    for fragment, replacement in zip(fragments, replacement_set):
-        new_line += fragment + replacement["ReplacementText"]
-
+    fragments = [
+        source_line[start:end]
+        for (_, start), (end, _) in zip(
+            insert_offsets[:-1], insert_offsets[1:]
+        )
+    ]
+    new_line = "".join(
+        fragment + replacement["ReplacementText"]
+        for fragment, replacement in zip(fragments, replacement_set)
+    )
     return source_line, new_line + fragments[-1]
 
 
@@ -478,7 +469,7 @@ def comment_diagnostic_to_log(diagnostic, source_line, log_messages, http_prefix
     try:
         index = file_path.index("cpp/")
         file_path = file_path[index:]
-        http_path = http_prefix + "/" + file_path
+        http_path = f"{http_prefix}/{file_path}"
         http_path = http_path.replace(" ", "%20")
     except LookupError as e:
         print(f"error {e} finding 'cpp/' in {file_path}")
@@ -492,11 +483,13 @@ def make_comments(diagnostics, diff_lookup, offset_lookup, build_dir, has_compil
 
     ignored_diagnostics = []
     if not has_compile_commands:
-        # Clang-tidy will not be able to find aws-sdk headers. Ignore the error generated for missing headers.
-        ignored_diagnostics.append("clang-diagnostic-error")
-        # Because of missing headers, clang-tidy generates too many false negatives for the following warnings.
-        ignored_diagnostics.append("cppcoreguidelines-init-variables")
-        ignored_diagnostics.append("cppcoreguidelines-avoid-non-const-global-variables")
+        ignored_diagnostics.extend(
+            (
+                "clang-diagnostic-error",
+                "cppcoreguidelines-init-variables",
+                "cppcoreguidelines-avoid-non-const-global-variables",
+            )
+        )
     log_messages = []
     for diagnostic in diagnostics:
         try:
@@ -552,10 +545,7 @@ def get_line_ranges(diff, files):
             continue
         added_lines = []
         for hunk in filename:
-            for line in hunk:
-                if line.is_added:
-                    added_lines.append(line.target_line_no)
-
+            added_lines.extend(line.target_line_no for line in hunk if line.is_added)
         for _, group in itertools.groupby(
             enumerate(added_lines), lambda ix: ix[0] - ix[1]
         ):
@@ -564,9 +554,10 @@ def get_line_ranges(diff, files):
                 [groups[0], groups[-1]]
             )
 
-    line_filter_json = []
-    for name, lines in lines_by_file.items():
-        line_filter_json.append(str({"name": name, "lines": lines}))
+    line_filter_json = [
+        str({"name": name, "lines": lines})
+        for name, lines in lines_by_file.items()
+    ]
     return json.dumps(line_filter_json, separators=(",", ":"))
 
 
@@ -594,14 +585,11 @@ def get_clang_tidy_warnings(
               {files} --export-fixes={FIXES_FILE}"
 
     start = datetime.datetime.now()
-    try:
+    with contextlib.suppress(subprocess.CalledProcessError):
         with message_group(f"Running:\n\t{command}"):
             subprocess.run(
                 command, capture_output=True, shell=True, check=True, encoding="utf-8"
             )
-    except subprocess.CalledProcessError:
-        pass
-
     end = datetime.datetime.now()
 
     print(f"Took: {end - start}")
@@ -822,11 +810,7 @@ if __name__ == "__main__":
 
     build_compile_commands = f"{args.build_dir}/compile_commands.json"
 
-    cmake_command = strip_enclosing_quotes(args.cmake_command)
-
-    # If we run CMake as part of the action, then we know the paths in
-    # the compile_commands.json file are going to be correct
-    if cmake_command:
+    if cmake_command := strip_enclosing_quotes(args.cmake_command):
         with message_group(f"Running cmake: {cmake_command}"):
             subprocess.run(cmake_command, shell=True, check=True)
 

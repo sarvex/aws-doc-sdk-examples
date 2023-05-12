@@ -32,11 +32,11 @@ def build_tests(service="*"):
     cmake_files = glob.glob( f"example_code/{service}/tests/CMakeLists.txt")
     cmake_files.extend(glob.glob( f"example_code/{service}/gtests/CMakeLists.txt"))
 
-    subprocess.call(f"echo $PATH", shell=True)
+    subprocess.call("echo $PATH", shell=True)
 
     run_files = []
 
-    if len (cmake_files) == 0:
+    if not cmake_files:
         return [1, []]
 
     has_error = False
@@ -68,10 +68,7 @@ def build_tests(service="*"):
         run_files.extend(glob.glob(f"{module_build_dir}/*_gtest"))
         run_files.extend(glob.glob(f"{module_build_dir}/Debug/*_gtest.exe"))
 
-    if has_error :
-        return [1, []]
-    else:
-        return [0, run_files]
+    return [1, []] if has_error else [0, run_files]
 
 
 def run_tests(run_files = [], type1=False, type2=False, type3=False):
@@ -86,13 +83,10 @@ def run_tests(run_files = [], type1=False, type2=False, type3=False):
     if type3 :
         filters.append("*_3_")
 
-    filter_arg = ""
-    if len(filters) > 0:
-        filter_arg = f"--gtest_filter={':'.join(filters)}"
-
+    filter_arg = f"--gtest_filter={':'.join(filters)}" if filters else ""
     passed_tests = 0
     failed_tests = 0
-    for run_file in run_files :
+    for run_file in run_files:
         print(f"Calling '{run_file} {filter_arg}'.")
         proc = subprocess.Popen([run_file, filter_arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in proc.stdout:
@@ -101,11 +95,11 @@ def run_tests(run_files = [], type1=False, type2=False, type3=False):
 
             match = re.search("\[  PASSED  \] (\d+) test", line)
             if match is not None:
-                passed_tests = passed_tests + int(match.group(1))
+                passed_tests = passed_tests + int(match[1])
                 continue
             match = re.search("\[  FAILED  \] (\d+) test", line)
             if match is not None:
-                failed_tests = failed_tests + int(match.group(1))
+                failed_tests = failed_tests + int(match[1])
                 continue
 
         proc.wait()
@@ -117,10 +111,7 @@ def run_tests(run_files = [], type1=False, type2=False, type3=False):
     print(f"{passed_tests} tests passed.")
     print(f"{failed_tests} tests failed.")
 
-    if has_error:
-        return 1
-    else :
-        return 0
+    return 1 if has_error else 0
 
 
 def main(argv):

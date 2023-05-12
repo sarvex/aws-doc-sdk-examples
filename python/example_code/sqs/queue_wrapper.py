@@ -116,30 +116,30 @@ def usage_demo():
 
     prefix = 'sqs-usage-demo-'
     river_queue = create_queue(
-        prefix + 'peculiar-river',
+        f'{prefix}peculiar-river',
         {
             'MaximumMessageSize': str(1024),
-            'ReceiveMessageWaitTimeSeconds': str(20)
-        }
+            'ReceiveMessageWaitTimeSeconds': str(20),
+        },
     )
     print(f"Created queue with URL: {river_queue.url}.")
 
     lake_queue = create_queue(
-        prefix + 'strange-lake.fifo',
+        f'{prefix}strange-lake.fifo',
         {
             'MaximumMessageSize': str(4096),
             'ReceiveMessageWaitTimeSeconds': str(10),
             'VisibilityTimeout': str(300),
             'FifoQueue': str(True),
-            'ContentBasedDeduplication': str(True)
-        }
+            'ContentBasedDeduplication': str(True),
+        },
     )
     print(f"Created queue with URL: {lake_queue.url}.")
 
-    stream_queue = create_queue(prefix + 'boring-stream')
+    stream_queue = create_queue(f'{prefix}boring-stream')
     print(f"Created queue with URL: {stream_queue.url}.")
 
-    alias_queue = get_queue(prefix + 'peculiar-river')
+    alias_queue = get_queue(f'{prefix}peculiar-river')
     print(f"Got queue with URL: {alias_queue.url}.")
 
     remove_queue(stream_queue)

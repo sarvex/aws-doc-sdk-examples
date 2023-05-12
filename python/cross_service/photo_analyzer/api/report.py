@@ -41,9 +41,12 @@ class Report(Resource):
                             'S3Object': {
                                 'Bucket': self.photo_bucket.name, 'Name': photo.key}})
                     logger.info("Found %s labels in %s.", len(response['Labels']), photo.key)
-                    for label in response.get('Labels', []):
-                        report_csv.append(
-                            ','.join((photo.key, label['Name'], str(label['Confidence']))))
+                    report_csv.extend(
+                        ','.join(
+                            (photo.key, label['Name'], str(label['Confidence']))
+                        )
+                        for label in response.get('Labels', [])
+                    )
                 except ClientError as err:
                     logger.warning(
                         "Couldn't detect labels in %s. Here's why: %s: %s", photo.key,
@@ -93,7 +96,6 @@ class Report(Resource):
         )
         text_labels = '\n'.join(args['analysis_labels'])
         try:
-            pass
             self.ses_client.send_email(
                 Source=args['sender'],
                 Destination={'ToAddresses': [args['recipient']]},

@@ -25,18 +25,14 @@ class MockManager:
     def setup_stubs(self, error, stop_on, stubber):
         ks_name = self.scenario_data.scenario.ks_wrapper.ks_name
         with self.stub_runner(error, stop_on) as runner:
-            if self.table_exists:
-                runner.add(
-                    stubber.stub_get_table, ks_name, self.table_name, self.table_status, self.table_arn,
-                    schema=self.table_schema)
-            else:
+            if not self.table_exists:
                 runner.add(
                     stubber.stub_get_table, ks_name, self.table_name, self.table_status, self.table_arn,
                     error_code='ResourceNotFoundException')
                 runner.add(stubber.stub_create_table, ks_name, self.table_name, {'status': 'ENABLED'}, self.table_arn)
-                runner.add(
-                    stubber.stub_get_table, ks_name, self.table_name, self.table_status, self.table_arn,
-                    schema=self.table_schema)
+            runner.add(
+                stubber.stub_get_table, ks_name, self.table_name, self.table_status, self.table_arn,
+                schema=self.table_schema)
             runner.add(stubber.stub_list_tables, ks_name, self.tables)
 
 

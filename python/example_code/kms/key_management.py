@@ -171,8 +171,7 @@ def key_management(kms_client):
     print('-'*88)
     key_manager.list_keys()
     print('-'*88)
-    key_id = key_manager.describe_key()
-    if key_id:
+    if key_id := key_manager.describe_key():
         key_manager.enable_disable_key(key_id)
         print('-'*88)
         key_manager.generate_data_key(key_id)

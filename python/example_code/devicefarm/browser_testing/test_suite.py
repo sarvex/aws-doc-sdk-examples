@@ -68,7 +68,8 @@ class TestHelloSuite:
         # We want a directory to save our files into. We're going to make a directory
         # in the current directory that holds our results.
         self.screenshot_path = os.path.join(
-            '.', 'results', get_git_hash() + '-' + (datetime.date.today().isoformat()))
+            '.', 'results', f'{get_git_hash()}-{datetime.date.today().isoformat()}'
+        )
         if not os.path.exists(self.screenshot_path):
             os.makedirs(self.screenshot_path, exist_ok=True)
 

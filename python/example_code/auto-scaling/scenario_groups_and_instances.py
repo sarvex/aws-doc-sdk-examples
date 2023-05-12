@@ -195,7 +195,10 @@ def wait_for_instances(group_name, as_wrapper):
         group = as_wrapper.describe_group(group_name)
         instance_ids = [i['InstanceId'] for i in group['Instances']]
         instances = as_wrapper.describe_instances(instance_ids) if instance_ids else []
-        if all([x['LifecycleState'] in ['Terminated', 'InService'] for x in instances]):
+        if all(
+            x['LifecycleState'] in ['Terminated', 'InService']
+            for x in instances
+        ):
             ready = True
         else:
             wait(10)
@@ -219,9 +222,7 @@ def run_scenario(as_wrapper, svc_helper):
           "EC2 instances. You can use an existing template or create a new one.")
     template_name = q.ask(
         "Enter the name of an existing launch template or press Enter to create a new one: ")
-    template = None
-    if template_name:
-        template = svc_helper.get_template(template_name)
+    template = svc_helper.get_template(template_name) if template_name else None
     if template is None:
         inst_type = 't1.micro'
         ami_id = 'ami-0ca285d4c2cda3300'
@@ -335,7 +336,7 @@ def run_scenario(as_wrapper, svc_helper):
             else:
                 done = True
 
-    print(f"Let's clean up.")
+    print("Let's clean up.")
     q.ask("Press Enter when you're ready.")
     if use_metrics:
         print(f"Stopping metrics collection for {group_name}.")
@@ -355,10 +356,11 @@ def run_scenario(as_wrapper, svc_helper):
     as_wrapper.delete_group(group_name)
     print('-'*88)
 
-    if template is not None:
-        if q.ask(f"Do you want to delete launch template {template_name} used in this demo (y/n)? "):
-            svc_helper.delete_template(template_name)
-            print("Template deleted.")
+    if template is not None and q.ask(
+        f"Do you want to delete launch template {template_name} used in this demo (y/n)? "
+    ):
+        svc_helper.delete_template(template_name)
+        print("Template deleted.")
 
     print("\nThanks for watching!")
     print('-'*88)

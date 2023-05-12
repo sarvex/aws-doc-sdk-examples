@@ -100,13 +100,11 @@ def get_dataset_types(lookoutvision_client, project):
     try:
         response = lookoutvision_client.describe_project(ProjectName=project)
 
-        datasets = []
-
-        for dataset in response['ProjectDescription']['Datasets']:
-            if dataset['Status'] in ("CREATE_COMPLETE", "UPDATE_COMPLETE"):
-                datasets.append(dataset['DatasetType'])
-        return datasets
-
+        return [
+            dataset['DatasetType']
+            for dataset in response['ProjectDescription']['Datasets']
+            if dataset['Status'] in ("CREATE_COMPLETE", "UPDATE_COMPLETE")
+        ]
     except lookoutvision_client.exceptions.ResourceNotFoundException:
         logger.exception("Project %s not found.", project)
         raise
@@ -182,7 +180,7 @@ def write_manifest_file(lookoutvision_client, s3_resource, project,  dataset_typ
                                            }
                                            )
 
-        output_manifest_file = dataset_type + ".manifest"
+        output_manifest_file = f"{dataset_type}.manifest"
 
         # Create manifest file then upload to Amazon S3 with images.
         with open(output_manifest_file, "w", encoding="utf-8") as manifest_file:
@@ -202,8 +200,9 @@ def write_manifest_file(lookoutvision_client, s3_resource, project,  dataset_typ
                             print(f"Excluded JSON line: {entry}")
                         else:
                             raise
-        upload_manifest_file(s3_resource, output_manifest_file,
-                             destination + "datasets/")
+        upload_manifest_file(
+            s3_resource, output_manifest_file, f"{destination}datasets/"
+        )
 
     except ClientError:
         logger.exception("Problem getting dataset_entries")
@@ -218,8 +217,7 @@ def export_datasets(lookoutvision_client, s3_resource, project, destination):
     :param destination: The destination Amazon S3 folder for the exported datasets.
     """
     # Add trailing backslash, if missing.
-    destination = destination if destination[-1] == "/"  \
-        else destination+"/"
+    destination = destination if destination[-1] == "/" else f"{destination}/"
 
     print(f"Exporting project {project} datasets to {destination}.")
 

@@ -40,7 +40,7 @@ class RekognitionStubber(ExampleStubber):
         if face.quality is not None:
             face_dict['Quality'] = face.quality
         if face.age_range is not None:
-            face_dict.update({
+            face_dict |= {
                 'AgeRange': {'Low': face.age_range[0], 'High': face.age_range[1]},
                 'Smile': {'Value': face.smile},
                 'Eyeglasses': {'Value': face.eyeglasses},
@@ -50,8 +50,11 @@ class RekognitionStubber(ExampleStubber):
                 'Mustache': {'Value': face.mustache},
                 'EyesOpen': {'Value': face.eyes_open},
                 'MouthOpen': {'Value': face.mouth_open},
-                'Emotions': [{'Type': emotion, 'Confidence': 80}
-                             for emotion in face.emotions]})
+                'Emotions': [
+                    {'Type': emotion, 'Confidence': 80}
+                    for emotion in face.emotions
+                ],
+            }
         return face_dict
 
     @staticmethod

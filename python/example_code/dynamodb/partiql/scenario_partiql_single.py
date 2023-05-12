@@ -111,7 +111,7 @@ def run_scenario(scaffold, wrapper, table_name):
     print("Success!")
     print('-'*88)
 
-    print(f"Getting data again to verify our update.")
+    print("Getting data again to verify our update.")
     output = wrapper.run_partiql(
         f"SELECT * FROM \"{table_name}\" WHERE title=? AND year=?", [title, year])
     for item in output['Items']:

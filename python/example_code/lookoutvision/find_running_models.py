@@ -106,9 +106,7 @@ def find_running_models():
     # Loop through each AWS Region and collect running models.
     for region in regions:
         logger.info("Checking %s", region)
-        region_info = {}
-        region_info['Region'] = region
-        region_info['Models'] = []
+        region_info = {'Region': region, 'Models': []}
         running_models_in_region = []
 
         session = boto3.Session(
@@ -126,9 +124,7 @@ def find_running_models():
             for project in page['Projects']:
                 running_models_in_project = find_running_models_in_project(
                     lfv_client, project["ProjectName"])
-                for running_model in running_models_in_project:
-                    running_models_in_region.append(running_model)
-
+                running_models_in_region.extend(iter(running_models_in_project))
                 region_info['Models'] = running_models_in_region
 
         if region_info['Models']:
@@ -149,9 +145,9 @@ def main():
         display_running_models(running_models)
 
     except TypeError as err:
-        print("Couldn't get available AWS Regions: " + format(err))
+        print(f"Couldn't get available AWS Regions: {format(err)}")
     except ClientError as err:
-        print("Service error occurred: " + format(err))
+        print(f"Service error occurred: {format(err)}")
     except EndpointConnectionError:
         logger.info("Problem calling endpoint: %s", format(err))
         raise

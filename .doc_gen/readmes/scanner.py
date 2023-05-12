@@ -68,35 +68,39 @@ class Scanner:
 
     def hello(self):
         self._load_examples()
-        hello = {}
-        for example_name, example in self.example_meta.items():
-            if example.get('category', '') == config.categories['hello'] and self.lang_name in example['languages']:
-                hello[example_name] = example
-        return hello
+        return {
+            example_name: example
+            for example_name, example in self.example_meta.items()
+            if example.get('category', '') == config.categories['hello']
+            and self.lang_name in example['languages']
+        }
 
     def actions(self):
         self._load_examples()
-        actions = {}
-        for example_name, example in self.example_meta.items():
-            if not example.get('category') and self.lang_name in example['languages']:
-                actions[example_name] = example
-        return actions
+        return {
+            example_name: example
+            for example_name, example in self.example_meta.items()
+            if not example.get('category')
+            and self.lang_name in example['languages']
+        }
 
     def scenarios(self):
         self._load_examples()
-        scenarios = {}
-        for example_name, example in self.example_meta.items():
-            if example.get('category', '') == config.categories['scenarios'] and self.lang_name in example['languages']:
-                scenarios[example_name] = example
-        return scenarios
+        return {
+            example_name: example
+            for example_name, example in self.example_meta.items()
+            if example.get('category', '') == config.categories['scenarios']
+            and self.lang_name in example['languages']
+        }
 
     def crosses(self):
         self._load_cross()
-        crosses = {}
-        for example_name, example in self.cross_meta.items():
-            if self.lang_name in example['languages'] and self.svc_name in example['services']:
-                crosses[example_name] = example
-        return crosses
+        return {
+            example_name: example
+            for example_name, example in self.cross_meta.items()
+            if self.lang_name in example['languages']
+            and self.svc_name in example['services']
+        }
 
     def snippet(self, example, sdk_ver, readme_folder, api_name):
         github = None

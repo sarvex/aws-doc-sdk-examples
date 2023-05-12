@@ -216,15 +216,14 @@ class Inference:
         if reject:
             anomalies.append("Coverage: Anomaly coverage too high.")
 
-        reject = Inference.reject_on_anomaly_types(
-            image, prediction, confidence_limit, anomaly_types_limit)
-
-        if reject:
+        if reject := Inference.reject_on_anomaly_types(
+            image, prediction, confidence_limit, anomaly_types_limit
+        ):
             anomalies.append(
                 "Anomaly type count: Too many anomaly types found.")
             print()
 
-        if len(anomalies) > 0:
+        if anomalies:
             print(f"Anomalies found in {image}")
             for anomaly in anomalies:
                 print(f"{anomaly}")

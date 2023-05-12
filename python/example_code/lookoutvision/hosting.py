@@ -53,7 +53,7 @@ class Hosting:
             finished = False
 
             # Wait until hosted or failed.
-            while finished is False:
+            while not finished:
                 model_description = lookoutvision_client.describe_model(
                     ProjectName=project_name, ModelVersion=model_version)
                 status = model_description["ModelDescription"]["Status"]
@@ -100,7 +100,7 @@ class Hosting:
             finished = False
 
             # Wait until stopped or failed.
-            while finished is False:
+            while not finished:
                 model_description = lookoutvision_client.describe_model(
                     ProjectName=project_name, ModelVersion=model_version)
                 status = model_description["ModelDescription"]["Status"]

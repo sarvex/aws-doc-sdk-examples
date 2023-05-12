@@ -77,9 +77,7 @@ def usage_demo():
             except ClientError as error:
                 # If AWS has not yet fully propagated the role, it deletes the role but
                 # returns NoSuchEntity.
-                if error.response['Error']['Code'] == 'NoSuchEntity':
-                    pass
-                else:
+                if error.response['Error']['Code'] != 'NoSuchEntity':
                     print(f"Couldn't delete {role.name}. Here's why: "
                           f"{error.response['Error']['Code']}")
                     raise

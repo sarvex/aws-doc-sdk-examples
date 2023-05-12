@@ -9,8 +9,8 @@ import pytest
 class MockManager:
     def __init__(self, stub_runner, scenario_data, input_mocker):
         self.scenario_data = scenario_data
-        self.run_arn = f'arn:aws:states:test-region:111122223333:/execution/test-run'
-        self.sm_arn = f'arn:aws:states:test-region:111122223333:/statemachine/test-sm'
+        self.run_arn = 'arn:aws:states:test-region:111122223333:/execution/test-run'
+        self.sm_arn = 'arn:aws:states:test-region:111122223333:/statemachine/test-sm'
         self.scenario_args = [self.run_arn]
         self.stub_runner = stub_runner
 
